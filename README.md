@@ -3,7 +3,7 @@
 
 # CMPUT 291 Mini Project 1 -Fall 2024
 Group member names and ccids (3-4 members)  
-  ccid1, name1  
+  luke5, Luke Thomas  
   ccid2, name2  
   ccid3, name2  
 
