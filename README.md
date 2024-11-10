@@ -4,7 +4,7 @@
 # CMPUT 291 Mini Project 1 -Fall 2024
 Group member names and ccids (3-4 members)  
   luke5, Luke Thomas  
-  ccid2, name2  
+  yuheng20, Yuheng Li  
   ccid3, name2  
 
 # Group work break-down strategy
