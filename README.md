@@ -5,7 +5,8 @@
 Group member names and ccids (3-4 members)  
   luke5, Luke Thomas  
   yuheng20, Yuheng Li  
-  ccid3, name2  
+  anant5, Anant Gupta
+  gurbaaz, Gurbaaz Gill
 
 # Group work break-down strategy
 Please add
