@@ -1,9 +1,11 @@
 import os
 import sys
 import sqlite3
+from followers import follower_utils
 
 CONN = None
 CURSOR = None
+USER_ID = None  # To store the current loggined userId
 
 ANSI = {
     "RESET": "\033[0m",     # Reset color
@@ -55,19 +57,24 @@ def login_screen():
     return
 
 def registered_user():
+    global USER_ID;
+
     clear_screen()
     print_location(1, 0, "*** REGISTERED USER ***")
     print("\n")
     
     user_id = input("Enter User ID: ").strip()
     password = input("Enter Password: ").strip()
-    
+
+
     # Query to check if the user exists and the password is correct
     CURSOR.execute("SELECT * FROM users WHERE usr = ? AND pwd = ?", (user_id, password))
     user = CURSOR.fetchone()
     
     if user:
+        USER_ID = user_id  # After Sucessfully login, assign current usrId to the global variable USER_ID
         print_location(3, 0, "Login successful!")
+        # follower_utils.getFollowers(user_id, CURSOR)
         display_feed(user_id)
     else:
         print_location(3, 0, "Invalid user ID or password.")
@@ -124,12 +131,19 @@ def unregistered_user():
     display_feed(user_id)
  
 def connect(path):
-    global connection, cursor
+    # global connection, cursor
+    #
+    # connection = sqlite3.connect(path)
+    # cursor = connection.cursor()
+    # cursor.execute(' PRAGMA foreign_keys=ON; ')
+    # connection.commit()
+    # return
+    global CONN, CURSOR
 
-    connection = sqlite3.connect(path)
-    cursor = connection.cursor()
-    cursor.execute(' PRAGMA foreign_keys=ON; ')
-    connection.commit()
+    CONN = sqlite3.connect(path)
+    CURSOR = CONN.cursor()
+    CURSOR.execute(' PRAGMA foreign_keys=ON; ')
+    CONN.commit()
     return
 
 def main():
