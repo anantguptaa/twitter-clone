@@ -1,7 +1,6 @@
 import os
 import sys
 import sqlite3
-import pwinput
 
 CONN = None
 CURSOR = None
