@@ -43,6 +43,9 @@ def move_cursor(x, y):
     print("\033[{1};{0}H".format(y, x), end='')    
 
 def login_screen():
+    '''
+    ## This functions prints a login screen menu and asks for a input from the user.
+    '''
     print_location(2, 0,'1. Registered User')
     print_location(3, 0,'2. Unregisterd User')
     print_location(4, 0,'3. Exit')
@@ -57,28 +60,33 @@ def login_screen():
     return
 
 def registered_user():
+    '''
+    ## This function is called for registerd users. 
+        It asks the user for a username and password.
+        If the user enters the correct credentials, login is succesfull and prints the user's feed
+    '''
     global USER_ID;
 
     clear_screen()
     print_location(1, 0, "*** REGISTERED USER ***")
     print("\n")
     
-    user_id = input("Enter User ID: ").strip()
+    user_name = input("Enter User ID: ").strip()
     password = input("Enter Password: ").strip()
-
-
+    
     # Query to check if the user exists and the password is correct
-    CURSOR.execute("SELECT * FROM users WHERE usr = ? AND pwd = ?", (user_id, password))
+    global CURSOR
+    CURSOR.execute("SELECT * FROM users WHERE upper(name) = ? AND pwd = ?", (user_name.upper(), password))
     user = CURSOR.fetchone()
     
     if user:
-        USER_ID = user_id  # After Sucessfully login, assign current usrId to the global variable USER_ID
+        USER_ID = user_name  # After Sucessfully login, assign current usrId to the global variable USER_ID
         print_location(3, 0, "Login successful!")
-        # follower_utils.getFollowers(user_id, CURSOR)
-        display_feed(user_id)
+        follower_utils.getFollowers(user_name, CURSOR) #need to test this function
     else:
         print_location(3, 0, "Invalid user ID or password.")
 
+# i (anant) will most probbaly delete this function, it doesnt work properly and yuheng has already implemented it
 def display_feed(user_id):
     offset = 0
     while True:
@@ -108,36 +116,37 @@ def display_feed(user_id):
             break
 
 def unregistered_user():
+    '''
+    ## This function is called for unregistered users.
+        It asks for name, email, phone and a passowrd and adds a new user to the
+        database.
+    '''
     clear_screen()
     print_location(1, 0, "*** UNREGISTERED USER ***")
-    print("\n")
     
     name = input("Enter name: ")
     email = input("Enter email: ")
-    phone = input("Enter phone number: ")
+    phone = int(input("Enter phone number: "))
     password = input("Enter password: ")
     
     # Generate a unique user ID (using max `usr` + 1 as a simple method)
+    global CURSOR, CONN
     CURSOR.execute("SELECT MAX(usr) FROM users")
     max_id = CURSOR.fetchone()[0]
-    user_id = max_id + 1 if max_id is not None else 1
-    
+    if max_id is not None:
+        user_id = max_id + 1
+    else:
+        user_id = 1
+        
     # Insert the new user into the users table
-    CURSOR.execute("INSERT INTO users (usr, name, email, phone, pwd) VALUES (?, ?, ?, ?, ?)",
-                   (user_id, name, email, phone, password))
+    query = "INSERT INTO users (usr, name, email, phone, pwd) VALUES (?, ?, ?, ?, ?)",
+    (user_id, name, email, phone, password)
+    CURSOR.execute(query)
     CONN.commit()
     
-    print_location(6, 0, f"Sign-up successful! Your User ID is {user_id}.")
-    display_feed(user_id)
+    print_location(7, 0, f"Sign-up successful! Your User ID is {user_id}.")
  
 def connect(path):
-    # global connection, cursor
-    #
-    # connection = sqlite3.connect(path)
-    # cursor = connection.cursor()
-    # cursor.execute(' PRAGMA foreign_keys=ON; ')
-    # connection.commit()
-    # return
     global CONN, CURSOR
 
     CONN = sqlite3.connect(path)
