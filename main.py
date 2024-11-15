@@ -1,5 +1,6 @@
 import os
 import sys
+
 import sqlite3
 from followers import follower_utils
 from common_utils import *
@@ -70,6 +71,24 @@ def registered_user():
             move_cursor(4, 0)
             print(ANSI["CLEARLINE"], end="\r") # Clear previous password
             
+            
+    print("\n")
+    
+    user_name = input("Enter User ID: ").strip()
+    password = input("Enter Password: ").strip()
+    
+    # Query to check if the user exists and the password is correct
+    # global CURSOR
+    CURSOR.execute("SELECT * FROM users WHERE upper(name) = ? AND pwd = ?", (user_name.upper(), password))
+    user = CURSOR.fetchone()
+    
+    if user:
+        USER_ID = user_name  # After Sucessfully login, assign current usrId to the global variable USER_ID
+        print_location(3, 0, "Login successful!")
+        follower_utils.displayFollowers(user_name, CURSOR) #need to test this function
+    else:
+        print_location(3, 0, "Invalid user ID or password.")
+
 # i (anant) will most probbaly delete this function, it doesnt work properly and yuheng has already implemented it
 def display_feed(user_id):
     offset = 0
@@ -151,7 +170,7 @@ def system_functions():
     
     if user_input == '1' or user_input == '1.':
         #search for tweets function to be added by luke
-        pass 
+        pass
     elif user_input == '2' or user_input == '2.':
         # search for users to be added by anant
         pass
@@ -164,7 +183,7 @@ def system_functions():
     elif user_input == '5' or user_input == '5.':
         # logout function to be added
         pass
-    
+
     return
 
 def search_users():

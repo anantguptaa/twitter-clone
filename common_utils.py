@@ -36,3 +36,4 @@ def move_cursor(x, y):
         - `y (int)`: y coordinate
     '''
     print("\033[{1};{0}H".format(y, x), end='')
+
