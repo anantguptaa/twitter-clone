@@ -58,7 +58,8 @@ def registered_user():
             print_location(6, 0, "Login successful!")
             
             CURRENT_USER_ID = user[0]  # After a successful login, assign the user ID to CURRENT_USER_ID
-            follower_utils.getFollowers(CURRENT_USER_ID, CURSOR, 8)  # need to test this function
+            move_cursor(8,0)
+            user_feed()  # need to test this function
             
             break  # Exit the loop if login is successful
         else:
@@ -69,7 +70,70 @@ def registered_user():
             
             move_cursor(4, 0)
             print(ANSI["CLEARLINE"], end="\r") # Clear previous password
-            
+
+def get_feed_tweets(offset=0, limit=5):
+    """
+    Retrieves tweets and retweets for the current user from followed users.
+
+    Parameters:
+        offset (int): The starting point for fetching tweets (default is 0).
+        limit (int): The number of tweets to fetch in each request (default is 5).
+
+    Returns:
+        List[Tuple]: A list of tuples containing writer ID, writer name, tweet text, and tweet date.
+    """
+    global CURSOR, CURRENT_USER_ID
+
+    CURSOR.execute('''
+        SELECT t.writer_id, u.name, t.text, t.tdate 
+        FROM tweets t
+        JOIN follows f ON t.writer_id = f.flwee
+        JOIN users u ON t.writer_id = u.usr
+        WHERE f.flwer = ?
+        ORDER BY t.tdate DESC
+        LIMIT ? OFFSET ?
+    ''', (CURRENT_USER_ID, limit, offset))
+
+    return CURSOR.fetchall()
+
+def user_feed():
+    """
+    Displays all tweets and retweets from users the current user is following.
+    Uses the existing `viewTweets` function for pagination.
+    """
+    global CURRENT_USER_ID, CURSOR
+
+    offset = 0  # Starting point for pagination
+    limit = 5  # Number of tweets to display per page
+
+    while True:
+        # Fetch tweets and retweets from the users the current user is following
+        tweets = get_feed_tweets(offset=offset, limit=limit)
+
+        if tweets:
+            print("\n*** YOUR FEED ***")
+            print(f"{'User':<20}{'Tweet':<50}{'Date'}")
+            print("-" * 80)
+
+            for writer_id, name, text, tdate in tweets:
+                print(f"{name:<20}{text[:45]:<50}{tdate}")
+        else:
+            if offset == 0:
+                print("Your feed is empty. Start following users to see their tweets!")
+            else:
+                print("No more tweets to display.")
+
+        # User prompt for further actions
+        user_input = input("\nEnter 'n' for next 5 tweets,'q' to exit, or 's' for Main Menu: ").strip().lower()
+        if user_input == 'n':
+            offset += limit  # Increment offset to fetch the next set of tweets
+        elif user_input == 'q':
+            break
+        elif user_input == 's':
+            system_functions(CURSOR, CURRENT_USER_ID)
+        else:
+            print("Invalid input. Please try again.")
+          
 def unregistered_user():
     '''
     ## This function is called for unregistered users.
@@ -147,9 +211,7 @@ def system_functions(cursor, current_user_id):
         search_users(CURSOR, CURRENT_USER_ID)
     elif user_input == '3' or user_input == '3.':
         compose_tweet(CURSOR)
-        pass
     elif user_input == '4' or user_input == '4.':
-        # list followers to be added by yuheng
         pass
     elif user_input == '5' or user_input == '5.':
         logout()
@@ -316,7 +378,6 @@ def compose_tweet(cursor):
         # Error handling
         print_location(6, 0, f"ERROR! Please Try Again: {error}")
 
-
 def logout():
     '''
     ## This function logs out the current user and redirects to the login screen.
@@ -325,7 +386,9 @@ def logout():
     CURRENT_USER_ID = None  # Clear the current logged-in user's ID
     clear_screen()  # Clear the console screen for a fresh login view
     print("\nYou have successfully logged out.")
-    input("Press Enter to return to the login screen...")
+    user_input = input("Press Enter to return to the login screen or 'q' to quit: ").lower()
+    if user_input == 'q':
+        exit()
     registered_user()  # Redirect back to the login screen
 
 
