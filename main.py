@@ -15,9 +15,7 @@ def login_screen():
     '''
     print('\n')
     print_location(3, 0,'1. Registered User')
-    print_location(4, 0,'2. Unregisterd User')
-    move_cursor(5,0)
-    print(ANSI["CLEARLINE"], end="\r")
+    print_location(4, 0,'2. Unregistered User')
     print_location(5, 0,'3. Exit')
     user_input = input(">>> ")
     
@@ -104,8 +102,16 @@ def unregistered_user():
         (CURRENT_USER_ID, name, email, phone, password)
     )
     CONN.commit()
-    
-    print_location(7, 0, f"Sign-up successful! Your User ID is {CURRENT_USER_ID}.")
+    clear_screen()
+    print_location(1, 0, "*** UNREGISTERED USER ***")
+    print_location(3, 0, f"Sign-up successful! Your User ID is {CURRENT_USER_ID}.")
+    user_input = input("Would you like to go to the Main Menu y/n: ")
+    if user_input.lower() == 'y' :
+        system_functions(CURSOR, CURRENT_USER_ID)
+    elif user_input.lower() == 'n':
+        exit()
+    else:
+        print('Invalid Input.')
  
 def connect(path):
     global CONN, CURSOR
@@ -114,9 +120,9 @@ def connect(path):
         CURSOR = CONN.cursor()
         CURSOR.execute(' PRAGMA foreign_keys=ON; ')
         CONN.commit()
-        print("Database connected successfully.")
+
     except sqlite3.Error as e:
-        print(f"Failed to connect to database: {e}")
+        print(f"\n\n\n\nFailed to connect to database: {e}")
         CONN, CURSOR = None, None
 
 
@@ -334,25 +340,22 @@ def main():
 
     global CURSOR, CONN
 
-    # if len(sys.argv) < 2:
-    #     print_location(2, 0, "Database not mentioned")
-    #     exit()
-    
-    # else:
-    # path = "./" + sys.argv[1]
-    path = "./prj-sample.db"
-    connect(path)
-    if CONN is None or CURSOR is None:
-        print("Could not establish a connection to the database.")
+    if len(sys.argv) < 2:
+        print_location(2, 0, "Database not mentioned")
         exit()
     
     else:
         path = "./" + sys.argv[1]
         connect(path)
-        login_screen()
-        #system_functions()
-    login_screen()
-    # system_functions()
+        if CONN is None or CURSOR is None:
+            print("Could not establish a connection to the database.")
+            exit()
+        
+        else:
+            path = "./" + sys.argv[1]
+            connect(path)
+            login_screen()
+            #system_functions()
         
 
 if __name__ == "__main__":
