@@ -226,7 +226,7 @@ def viewTweets(follower_id, offset=0, limit=3):
     else:
         print("No more tweets available.")
     
-
+    return tweets
 
 # Older version in case you need: 
 # # follower_util
