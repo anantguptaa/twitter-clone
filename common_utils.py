@@ -19,3 +19,14 @@ def clear_screen():
             os.system("cls")
     else:                # for Mac/Linux
         os.system("clear")
+
+
+def move_cursor(x, y):
+    '''
+    ## Move cursor to specified location
+
+    ### Args:
+        - `x (int)`: x coordinate
+        - `y (int)`: y coordinate
+    '''
+    print("\033[{1};{0}H".format(y, x), end='')
