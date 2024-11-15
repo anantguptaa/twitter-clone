@@ -7,7 +7,7 @@ from common_utils import *
 
 CONN = None
 CURSOR = None
-USER_ID = None  # To store the current loggined userId
+CURRENT_USER_ID = None  # To store the current loggined userId
 
 def login_screen():
     '''
@@ -33,7 +33,7 @@ def registered_user():
         It asks the user for a username and password.
         If the user enters the correct credentials, login is successful and prints the user's feed.
     '''
-    global USER_ID
+    global CURRENT_USER_ID, CURSOR
     clear_screen()
     print_location(1, 0, "*** REGISTERED USER ***")
     print_location(2, 0, "")
@@ -49,7 +49,6 @@ def registered_user():
         password = input("").strip()
 
         # Query to check if the user exists and the password is correct
-        global CURSOR
         CURSOR.execute("SELECT * FROM users WHERE upper(name) = ? AND pwd = ?", (user_name.upper(), password))
         user = CURSOR.fetchone()
 
@@ -58,8 +57,8 @@ def registered_user():
             print(ANSI["CLEARLINE"], end="\r") # Clear anything written previulsy in that line
             print_location(6, 0, "Login successful!")
             
-            USER_ID = user[0]  # After a successful login, assign the user ID to USER_ID
-            follower_utils.getFollowers(USER_ID, CURSOR, 8)  # need to test this function
+            CURRENT_USER_ID = user[0]  # After a successful login, assign the user ID to CURRENT_USER_ID
+            follower_utils.getFollowers(CURRENT_USER_ID, CURSOR, 8)  # need to test this function
             
             break  # Exit the loop if login is successful
         else:
@@ -71,52 +70,6 @@ def registered_user():
             move_cursor(4, 0)
             print(ANSI["CLEARLINE"], end="\r") # Clear previous password
             
-            
-    print("\n")
-    
-    user_name = input("Enter User ID: ").strip()
-    password = input("Enter Password: ").strip()
-    
-    # Query to check if the user exists and the password is correct
-    # global CURSOR
-    CURSOR.execute("SELECT * FROM users WHERE upper(name) = ? AND pwd = ?", (user_name.upper(), password))
-    user = CURSOR.fetchone()
-    
-    if user:
-        USER_ID = user_name  # After Sucessfully login, assign current usrId to the global variable USER_ID
-        print_location(3, 0, "Login successful!")
-        follower_utils.displayFollowers(user_name, CURSOR) #need to test this function
-    else:
-        print_location(3, 0, "Invalid user ID or password.")
-
-# i (anant) will most probbaly delete this function, it doesnt work properly and yuheng has already implemented it
-def display_feed(user_id):
-    offset = 0
-    while True:
-        CURSOR.execute('''
-            SELECT tid, text, tdate FROM tweets 
-            WHERE writer_id IN (SELECT flwee FROM follows WHERE flwer = ?)
-            ORDER BY tdate DESC
-            LIMIT 5 OFFSET ?
-        ''', (user_id, offset))
-        
-        tweets = CURSOR.fetchall()
-        
-        if not tweets:
-            print("No more tweets to show.")
-            break
-        
-        clear_screen()
-        print_location(1, 0, "*** FEED ***")
-        for i, (tid, text, tdate) in enumerate(tweets, start=1):
-            print_location(i + 1, 0, f"{tdate} - {text}")
-        
-        # Prompt user for more or exit
-        user_input = input("Enter 'n' for next 5 tweets or 'q' to quit: ").strip().lower()
-        if user_input == 'n':
-            offset += 5
-        else:
-            break
 
 def unregistered_user():
     '''
@@ -137,28 +90,37 @@ def unregistered_user():
     CURSOR.execute("SELECT MAX(usr) FROM users")
     max_id = CURSOR.fetchone()[0]
     if max_id is not None:
-        user_id = max_id + 1
+        CURRENT_USER_ID = max_id + 1
     else:
-        user_id = 1
+        CURRENT_USER_ID = 1
         
     # Insert the new user into the users table
     query = "INSERT INTO users (usr, name, email, phone, pwd) VALUES (?, ?, ?, ?, ?)",
-    (user_id, name, email, phone, password)
+    (CURRENT_USER_ID, name, email, phone, password)
     CURSOR.execute(query)
     CONN.commit()
     
-    print_location(7, 0, f"Sign-up successful! Your User ID is {user_id}.")
+    print_location(7, 0, f"Sign-up successful! Your User ID is {CURRENT_USER_ID}.")
  
 def connect(path):
     global CONN, CURSOR
+    try:
+        CONN = sqlite3.connect(path)
+        CURSOR = CONN.cursor()
+        CURSOR.execute(' PRAGMA foreign_keys=ON; ')
+        CONN.commit()
+        print("Database connected successfully.")
+    except sqlite3.Error as e:
+        print(f"Failed to connect to database: {e}")
+        CONN, CURSOR = None, None
 
-    CONN = sqlite3.connect(path)
-    CURSOR = CONN.cursor()
-    CURSOR.execute(' PRAGMA foreign_keys=ON; ')
-    CONN.commit()
-    return
 
-def system_functions():
+def system_functions(cursor, current_user_id):
+    
+    global CURSOR, CURRENT_USER_ID
+    CURSOR = cursor
+    CURRENT_USER_ID = current_user_id
+    
     clear_screen()
     print_location(1,0, '*** SYSTEM FUNCTIONALITIES ***')
     print_location(3, 0,'1. Search for tweets')
@@ -172,8 +134,7 @@ def system_functions():
         #search for tweets function to be added by luke
         pass
     elif user_input == '2' or user_input == '2.':
-        # search for users to be added by anant
-        pass
+        search_users(CURSOR, CURRENT_USER_ID)
     elif user_input == '3' or user_input == '3.':
         # compose a tweet function to be added by gurbaaz
         pass
@@ -186,17 +147,15 @@ def system_functions():
 
     return
 
-def search_users():
-    #still working on this
+def search_users(cursor, current_user_id):
     clear_screen()
     print_location(1,0,"*** SEARCH FOR USERS ***")
     
-    move_cursor(2,0)
-    print_location(2, 0, "Enter Keyword: ")
-    move_cursor (2, 16)
+    print_location(3, 0, "Enter Keyword: ")
+    move_cursor (3, 16)
     keyword = input("")
     
-    global CURSOR
+    global CURSOR, CURRENT_USER_ID
     offset = 0
     CURSOR.execute('''
             SELECT usr, name FROM users 
@@ -206,6 +165,34 @@ def search_users():
         ''', (f'%{keyword}%', offset))
     
     users = CURSOR.fetchall()
+    
+    if not users:
+        print_location(5, 0, "No users found.")
+        
+    print_location(5, 0, "Users found: ")
+    for index, (usr, name) in enumerate(users, start=1):
+            print_location(5 + index, 4, f"{index}. {name} (User ID: {usr})")
+            
+    move_cursor(5+index,0)
+    # Get user input to proceed
+    user_input = input("\nEnter 'n' to see more, user number to view details, or 'q' to quit: ").strip().lower()
+        
+    if user_input == 'n':
+        offset += 5
+    elif user_input == 'q':
+        exit()
+    else:
+        try:
+            user_index = int(user_input) - 1
+            if 0 <= user_index < len(users):
+                selected_user_id = users[user_index][0]
+                follower_utils.showFollowerDetails(selected_user_id, 7 + index)
+            else:
+                print_location(8, 0, "Invalid selection. Try again.")
+        except ValueError:
+            print_location(8, 0, "Invalid input. Try again.")
+        
+    
 
 def main():
     os.system("")  # Clear console
@@ -215,15 +202,19 @@ def main():
 
     global CURSOR, CONN
 
-    if len(sys.argv) < 2:
-        print_location(2, 0, "Database not mentioned")
-        exit()
+    # if len(sys.argv) < 2:
+    #     print_location(2, 0, "Database not mentioned")
+    #     exit()
     
-    else:
-        path = "./" + sys.argv[1]
-        connect(path)
-        login_screen()
-        # system_functions()
+    # else:
+    # path = "./" + sys.argv[1]
+    path = "./prj-sample.db"
+    connect(path)
+    if CONN is None or CURSOR is None:
+        print("Could not establish a connection to the database.")
+        exit()
+    login_screen()
+    # system_functions()
         
 
 if __name__ == "__main__":

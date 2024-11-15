@@ -42,10 +42,10 @@ def getFollowers(user_id, cursor, row):
         if user_input == 'n':
             offset += 5
         elif user_input == 's':
-            system_functions()
+            system_functions(cursor, user_id)
             return
         elif user_input == 'q':
-            break
+            exit()
         else:
             try:
                 follower_id = int(user_input)
