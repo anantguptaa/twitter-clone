@@ -1,6 +1,6 @@
+# follower_util
 import sqlite3
-from common_utils import *
-
+from main import print_location, system_functions
 CURRENT_USR = None
 CURSOR = None
 
@@ -10,22 +10,9 @@ def getFollowers(user_id, cursor, row):
 
     CURRENT_USR = user_id
     CURSOR = cursor
-    """
-      Retrieves and displays a list of followers for the given user, in groups of five.
-
-       Parameters:
-           user_id (int): The ID of the current user.
-           cursor (sqlite3.Cursor): The database cursor to execute SQL queries.
-
-       Functionality:
-           - Fetches followers from the database in batches of five.
-           - Displays each follower's name, ID, and whether the current user is following them.
-           - Allows the user to view more followers, check follower details, or quit.
-       """
 
     offset = 0
     
-
     while True:
         cursor.execute(
         '''
@@ -63,7 +50,7 @@ def getFollowers(user_id, cursor, row):
             system_functions()
             return
         elif user_input == 'q':
-            break  # Exit the loop
+            break
         else:
             try:
                 follower_id = int(user_input)
@@ -75,58 +62,7 @@ def getFollowers(user_id, cursor, row):
                 print_location(row + 2, 0, "Invalid input. Please try again.")
 
 
-
-def getFollowerList(offset=0, limit=5):
-    """
-    Retrieves a list of followers for a given user with pagination support.
-
-    Parameters:
-        user_id (int): The ID of the current user.
-        offset (int): The starting point for fetching followers (default is 0).
-        limit (int): The number of followers to fetch in each request (default is 5).
-
-    Functionality:
-        - Fetches followers from the database in batches.
-        - Returns a list of follower IDs and names.
-    """
-    cursor = CURSOR
-    user_id = CURRENT_USR
-
-    cursor.execute('''
-        SELECT u.usr, u.name 
-        FROM follows f
-        JOIN users u ON f.flwer = u.usr
-        WHERE f.flwee = ?
-        LIMIT ? OFFSET ?
-    ''', (user_id, limit, offset))
-
-    followers = cursor.fetchall()
-
-    if followers:
-        follower_list = []
-        for fid, name in followers:
-            follower_list.append((fid, name))
-        return follower_list
-    else:
-        return None
-
-def showFollowerDetails(follower_id):
-    """
-      Displays detailed information about a specific follower, including contact info,
-      tweet counts, and latest tweets.
-
-      Parameters:
-          follower_id (int): The ID of the follower whose details are to be shown.
-
-      Functionality:
-          - Fetches and displays the follower's name, email, and phone number.
-          - Shows the number of tweets, people they follow, and their followers.
-          - Displays the last three tweets.
-          - Offers options to follow this follower, see more tweets, or go back.
-      """
-
-    print_location(1, 0, "*** FOLLOWER DETAIL ***")
-
+def showFollowerDetails(follower_id, row):
     cursor = CURSOR
     cursor.execute("SELECT name, email, phone FROM users WHERE usr = ?", (follower_id,))
     follower = cursor.fetchone()
@@ -137,13 +73,15 @@ def showFollowerDetails(follower_id):
         print_location(row + 1, 0, f"Email: {email}")
         print_location(row + 2, 0, f"Phone: {phone}")
 
-        # Fetch counts for tweets, following, and followers
+        # Number of tweets
         cursor.execute("SELECT COUNT(*) FROM tweets WHERE writer_id = ?", (follower_id,))
         tweet_count = cursor.fetchone()[0]
 
+        # Number of people they followers
         cursor.execute("SELECT COUNT(*) FROM follows WHERE flwer = ?", (follower_id,))
         following_count = cursor.fetchone()[0]
 
+        # Number of followers
         cursor.execute("SELECT COUNT(*) FROM follows WHERE flwee = ?", (follower_id,))
         follower_count = cursor.fetchone()[0]
 
@@ -175,22 +113,12 @@ def showFollowerDetails(follower_id):
     else:
         print_location(row, 0, "Follower not found.")
 
-def followUser(follower_id):
-    """
-        Allows the current user to follow another user if they are not already following them.
 
-        Parameters:
-            follower_id (int): The ID of the user to follow.
-
-        Functionality:
-            - Checks if the current user already follows the specified user.
-            - If not, adds a follow relationship in the database and commits the change.
-        """
+def followUser(follower_id, row):
+    # Check if the follow relationship already exists
     user_id = CURRENT_USR
     cursor = CURSOR
 
-
-    # Check if the follow relationship already exists
     if isFollowing(follower_id):
         print_location(row, 0, f"Error: You are already following user {follower_id}.")
         return
@@ -207,16 +135,10 @@ def followUser(follower_id):
 
 
 def isFollowing(follower_id):
+
     """
-       Checks if the current user is already following a specified user.
-
-       Parameters:
-           follower_id (int): The ID of the user to check.
-
-       Returns:
-           bool: True if the current user is following the specified user, False otherwise.
-       """
-
+    Check if the user is already following the given follower.
+    """
     user_id = CURRENT_USR
     cursor = CURSOR
     cursor.execute(
@@ -226,34 +148,3 @@ def isFollowing(follower_id):
 
     existing_follow = cursor.fetchone()
     return existing_follow is not None
-
-
-def viewTweets(follower_id, offset=0, limit=3):
-    """
-    Displays a set of tweets from a follower, given the offset for pagination.
-
-    Parameters:
-        follower_id (int): The ID of the follower whose tweets are to be shown.
-        offset (int): The offset (starting point) for fetching tweets (default is 0).
-        limit (int): The number of tweets to fetch in each request (default is 3).
-
-    Functionality:
-        - Fetches and displays tweets from the specified follower.
-        - Allows pagination by adjusting the offset.
-    """
-
-    cursor = CURSOR
-    cursor.execute('''
-        SELECT text, tdate FROM tweets
-        WHERE writer_id = ?
-        ORDER BY tdate DESC
-        LIMIT ? OFFSET ?
-    ''', (follower_id, limit, offset))
-
-    tweets = cursor.fetchall()
-
-    if tweets:
-        for tweet in tweets:
-            print(f"{tweet[1]} - {tweet[0]}")
-    else:
-        print("No more tweets available.")

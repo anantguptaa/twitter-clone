@@ -1,18 +1,12 @@
 import os
 import sys
 import sqlite3
-from followers import *
+from followers import follower_utils
 from common_utils import *
 
 CONN = None
 CURSOR = None
 USER_ID = None  # To store the current loggined userId
-
-ANSI = {
-    "RESET": "\033[0m",     # Reset color
-    "CLEARLINE": "\033[0K"  # Clear line
-}
-
 
 def login_screen():
     '''
@@ -59,6 +53,7 @@ def registered_user():
         user = CURSOR.fetchone()
 
         if user:
+            move_cursor(6,0)
             print(ANSI["CLEARLINE"], end="\r") # Clear anything written previulsy in that line
             print_location(6, 0, "Login successful!")
             
@@ -75,24 +70,6 @@ def registered_user():
             move_cursor(4, 0)
             print(ANSI["CLEARLINE"], end="\r") # Clear previous password
             
-            
-    print("\n")
-    
-    user_name = input("Enter User ID: ").strip()
-    password = input("Enter Password: ").strip()
-    
-    # Query to check if the user exists and the password is correct
-    global CURSOR
-    CURSOR.execute("SELECT * FROM users WHERE upper(name) = ? AND pwd = ?", (user_name.upper(), password))
-    user = CURSOR.fetchone()
-    
-    if user:
-        USER_ID = user_name  # After Sucessfully login, assign current usrId to the global variable USER_ID
-        print_location(3, 0, "Login successful!")
-        follower_utils.displayFollowers(user_name, CURSOR) #need to test this function
-    else:
-        print_location(3, 0, "Invalid user ID or password.")
-
 # i (anant) will most probbaly delete this function, it doesnt work properly and yuheng has already implemented it
 def display_feed(user_id):
     offset = 0
@@ -170,7 +147,7 @@ def system_functions():
     print_location(5, 0,'3. Compose a tweet')
     print_location(6, 0,'4. List followers')
     print_location(7, 0,'5. Logout')
-    user_input = input("")
+    user_input = input(">>>")
     
     if user_input == '1' or user_input == '1.':
         #search for tweets function to be added by luke
@@ -189,6 +166,27 @@ def system_functions():
         pass
     
     return
+
+def search_users():
+    #still working on this
+    clear_screen()
+    print_location(1,0,"*** SEARCH FOR USERS ***")
+    
+    move_cursor(2,0)
+    print_location(2, 0, "Enter Keyword: ")
+    move_cursor (2, 16)
+    keyword = input("")
+    
+    global CURSOR
+    offset = 0
+    CURSOR.execute('''
+            SELECT usr, name FROM users 
+            WHERE name LIKE ?
+            ORDER BY LENGTH(name) ASC
+            LIMIT 5 OFFSET ?
+        ''', (f'%{keyword}%', offset))
+    
+    users = CURSOR.fetchall()
 
 def main():
     os.system("")  # Clear console

@@ -1,4 +1,10 @@
 import os
+
+ANSI = {
+    "RESET": "\033[0m",     # Reset color
+    "CLEARLINE": "\033[0K"  # Clear line
+}
+
 def print_location(x, y, text):
     '''
     ## Print text at specified location
