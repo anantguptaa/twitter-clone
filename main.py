@@ -1,5 +1,6 @@
 import os
 import sys
+import getpass
 from datetime import datetime
 import sqlite3
 from followers import follower_utils
@@ -44,9 +45,8 @@ def registered_user():
         move_cursor(3, 17)
         user_name = input("").strip()
         
-        print_location(4, 0, "Enter Password: ")
         move_cursor(4, 17)
-        password = input("").strip()
+        password = getpass.getpass("Enter Password: ").strip()
 
         # Query to check if the user exists and the password is correct
         CURSOR.execute("SELECT * FROM users WHERE upper(name) = ? AND pwd = ?", (user_name.upper(), password))
