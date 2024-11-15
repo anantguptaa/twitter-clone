@@ -5,6 +5,7 @@ from datetime import datetime
 import sqlite3
 from followers import follower_utils
 from common_utils import *
+from tweet_search import search_tweets
 
 CONN = None
 CURSOR = None
@@ -206,7 +207,7 @@ def system_functions(cursor, current_user_id):
       user_input = input(">>>")
       
       if user_input == '1' or user_input == '1.':
-          #search for tweets function to be added by luke
+          search_tweets(CURSOR)
           pass
       elif user_input == '2' or user_input == '2.':
           search_users(CURSOR, CURRENT_USER_ID)
