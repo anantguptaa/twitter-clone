@@ -207,7 +207,7 @@ def system_functions(cursor, current_user_id):
       user_input = input(">>>")
       
       if user_input == '1' or user_input == '1.':
-          search_tweets(CURSOR)
+          search_tweets(CURSOR, CURRENT_USER_ID)
           pass
       elif user_input == '2' or user_input == '2.':
           search_users(CURSOR, CURRENT_USER_ID)
