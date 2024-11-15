@@ -16,6 +16,8 @@ def login_screen():
     print('\n')
     print_location(3, 0,'1. Registered User')
     print_location(4, 0,'2. Unregisterd User')
+    move_cursor(5,0)
+    print(ANSI["CLEARLINE"], end="\r")
     print_location(5, 0,'3. Exit')
     user_input = input(">>> ")
     
@@ -140,7 +142,7 @@ def system_functions(cursor, current_user_id):
     elif user_input == '2' or user_input == '2.':
         search_users(CURSOR, CURRENT_USER_ID)
     elif user_input == '3' or user_input == '3.':
-        compose_tweet()
+        compose_tweet(CURSOR)
         pass
     elif user_input == '4' or user_input == '4.':
         # list followers to be added by yuheng
@@ -302,7 +304,7 @@ def compose_tweet(cursor):
                 
 
         
-        
+
 
     except ValueError as ve:
         print(ve)  
@@ -311,73 +313,6 @@ def compose_tweet(cursor):
         # Error handling
         print_location(6, 0, f"ERROR! Please Try Again: {error}")
 
-
-def compose_tweet(cursor):
-    global CURSOR
-
-    # taing input from user
-    tweet_text = input("Enter your tweet: ")
-    # making list of input words
-    input_terms = tweet_text.split(" ")
-    valid = 0
-    hashtag = []
-    for term in input_terms:
-        if term[0] == "#" and len(term) > 1:
-            if term[1:].lower() not in hashtag:
-                hashtag.append(term[1:0].lower())
-            else:
-                raise ValueError("Duplicate hashtags are not allowed. Please try again!")
-
-
-    CURSOR.execute(
-       """
-        SELECT MAX(tid) FROM tweets
-       """
-    )
-    max_tid = CURSOR.fetchone()[0]
-    # setting 1 if it is first tweet or setting it as max+1 for next tweet
-    if max_tid is None:
-        new_tid = 1 
-    else:
-        new_tid = max_tid + 1  
-
-    current_date = datetime.now().date() 
-    current_time = datetime.now().time()  
-
-    user_id = int(input("Enter your user ID (writer_id): "))
-
-    try:
-        # SQL query to insert the tweet
-        insert_tweet_query = """
-        INSERT INTO tweets (tid, writer_id, text, tdate, ttime, replyto_tid)
-        VALUES (?, ?, ?, ?, ?, NULL)
-        """
-
-        # Inserting the tweet into the database
-        CURSOR.execute(
-            insert_tweet_query,
-            (new_tid, user_id, tweet_text, current_date, current_time)
-        )
-
-        # SQL query for hashtag mentions
-        insert_hashtag_query = """
-        INSERT INTO hashtag_mentions (tid, term)
-        VALUES (?, ?)
-        """
-
-        # Adding each valid hashtag to the hashtag_mentions table
-        for tag in hashtag:
-            CURSOR.execute(insert_hashtag_query, (new_tid, tag))
-
-        # Save changes
-        print("Tweet and hashtags successfully recorded!")
-
-    except ValueError as ve:
-        print(ve)  
-
-    except Exception as error:
-        # Error handling
-        print(f"Error during database operation: {error}")
 
 def logout():
     '''
