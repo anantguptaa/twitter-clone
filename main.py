@@ -83,7 +83,7 @@ def registered_user():
     if user:
         USER_ID = user_name  # After Sucessfully login, assign current usrId to the global variable USER_ID
         print_location(3, 0, "Login successful!")
-        follower_utils.getFollowers(user_name, CURSOR) #need to test this function
+        follower_utils.displayFollowers(user_name, CURSOR) #need to test this function
     else:
         print_location(3, 0, "Invalid user ID or password.")
 
