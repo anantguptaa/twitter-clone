@@ -194,27 +194,29 @@ def system_functions(cursor, current_user_id):
     CURSOR = cursor
     CURRENT_USER_ID = current_user_id
     
-    clear_screen()
-    print_location(1,0, '*** SYSTEM FUNCTIONALITIES ***')
-    print_location(3, 0,'1. Search for tweets')
-    print_location(4, 0,'2. Search for users')
-    print_location(5, 0,'3. Compose a tweet')
-    print_location(6, 0,'4. List followers')
-    print_location(7, 0,'5. Logout')
+    while True:
+      clear_screen()
+      print_location(1,0, '*** SYSTEM FUNCTIONALITIES ***')
+      print_location(3, 0,'1. Search for tweets')
+      print_location(4, 0,'2. Search for users')
+      print_location(5, 0,'3. Compose a tweet')
+      print_location(6, 0,'4. List followers')
+      print_location(7, 0,'5. Logout')
 
-    user_input = input(">>>")
-    
-    if user_input == '1' or user_input == '1.':
-        #search for tweets function to be added by luke
-        pass
-    elif user_input == '2' or user_input == '2.':
-        search_users(CURSOR, CURRENT_USER_ID)
-    elif user_input == '3' or user_input == '3.':
-        compose_tweet(CURSOR)
-    elif user_input == '4' or user_input == '4.':
-        pass
-    elif user_input == '5' or user_input == '5.':
-        logout()
+      user_input = input(">>>")
+      
+      if user_input == '1' or user_input == '1.':
+          #search for tweets function to be added by luke
+          pass
+      elif user_input == '2' or user_input == '2.':
+          search_users(CURSOR, CURRENT_USER_ID)
+      elif user_input == '3' or user_input == '3.':
+          compose_tweet(CURSOR)
+      elif user_input == '4' or user_input == '4.':
+          follower_utils.showFollowers(CURRENT_USER_ID, CURSOR)
+      elif user_input == '5' or user_input == '5.':
+          logout()
+          
 
     return
 
@@ -366,7 +368,7 @@ def compose_tweet(cursor):
         move_cursor(9, 90)
         user_input = input("")
         if user_input == 'h':
-            follower_utils.getFollowers(CURRENT_USER_ID, CURSOR, 8)
+            follower_utils.showFollowers(CURRENT_USER_ID, CURSOR)
             i = False
         elif user_input == 'q':
             exit()
