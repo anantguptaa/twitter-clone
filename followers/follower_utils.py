@@ -40,7 +40,9 @@ def getFollowers(user_id, cursor, row):
             next_followers = getFollowerList(offset=offset + 5, limit=5)
             if next_followers:  # Only load more if there are more followers
                offset += 5  # Move to the next page
-      
+            else:
+              print("No more follower to display")
+
         elif user_input == 'q':
             break  # exit the loop, go back to Main Menu
         else:
@@ -136,10 +138,13 @@ def showFollowerDetails(follower_id):
                     followUser(follower_id)  # Assuming you have the followUser function implemented
 
             elif user_input == 't':
-                # View more tweets (next 3 tweets)
-                print(f"\nNext 3 tweets from {name}:")
-                viewTweets(follower_id, offset=offset, limit=3)
-                offset += 3  # Increment the offset for the next page of tweets
+                # # View more tweets (next 3 tweets)
+                print(f"\nNext 3 tweets from {name}:")               
+                new_tweets = viewTweets(follower_id, offset=offset, limit=3)
+                if new_tweets:  
+                    offset += 3  # Increment the offset for the next page of tweets only there is tweets in the next page
+              
+                  
             elif user_input == 'q':
                 break  # Go back to the previous screen
             else:
@@ -220,7 +225,7 @@ def viewTweets(follower_id, offset=0, limit=3):
             print(f"{tweet[1]} - {tweet[0]}")
     else:
         print("No more tweets available.")
-
+    
 
 
 # Older version in case you need: 
