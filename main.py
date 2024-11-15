@@ -70,7 +70,6 @@ def registered_user():
             move_cursor(4, 0)
             print(ANSI["CLEARLINE"], end="\r") # Clear previous password
             
-
 def unregistered_user():
     '''
     ## This function is called for unregistered users.
@@ -125,7 +124,6 @@ def connect(path):
         print(f"\n\n\n\nFailed to connect to database: {e}")
         CONN, CURSOR = None, None
 
-
 def system_functions(cursor, current_user_id):
     
     global CURSOR, CURRENT_USER_ID
@@ -155,7 +153,6 @@ def system_functions(cursor, current_user_id):
         pass
     elif user_input == '5' or user_input == '5.':
         logout()
-        pass
 
     return
 
@@ -329,7 +326,7 @@ def logout():
     clear_screen()  # Clear the console screen for a fresh login view
     print("\nYou have successfully logged out.")
     input("Press Enter to return to the login screen...")
-    login_screen()  # Redirect back to the login screen
+    registered_user()  # Redirect back to the login screen
 
 
 def main():
