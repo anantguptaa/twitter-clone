@@ -95,9 +95,12 @@ def unregistered_user():
         CURRENT_USER_ID = 1
         
     # Insert the new user into the users table
-    query = "INSERT INTO users (usr, name, email, phone, pwd) VALUES (?, ?, ?, ?, ?)",
-    (CURRENT_USER_ID, name, email, phone, password)
-    CURSOR.execute(query)
+    CURSOR.execute(
+        """
+        INSERT INTO users (usr, name, email, phone, pwd) VALUES (?, ?, ?, ?, ?)
+        """,
+        (CURRENT_USER_ID, name, email, phone, password)
+    )
     CONN.commit()
     
     print_location(7, 0, f"Sign-up successful! Your User ID is {CURRENT_USER_ID}.")
@@ -156,7 +159,53 @@ def search_users(cursor, current_user_id):
     keyword = input("")
     
     global CURSOR, CURRENT_USER_ID
+    
     offset = 0
+    limit = 5
+    users = get_users_list(keyword, offset, limit)
+    
+    if not users:
+        print_location(5, 0, "No users found.")
+        
+    print_location(5, 0, "Users found: ")
+
+    for index, (usr, name) in enumerate(users, start=1):
+            print_location(5 + index, 4, f"{index}. {name} (User ID: {usr})")
+            
+    move_cursor(5+index,0)
+    # Get user input to proceed
+    while True:
+        user_input = input("\nEnter 'n' to see more, user number to view details, 'q' to quit, or 's' for Main Menu: ").strip().lower()
+            
+        if user_input == 'n':
+            next_followers = get_users_list(keyword, offset=offset + 5, limit=5)
+            if next_followers:  # Only load more if there are more followers
+                offset += 5  # Move to the next page
+            else:
+                print("No more users to display")
+                
+        elif user_input == 'q':
+            exit()
+            
+        elif user_input == 's':
+            system_functions(cursor, current_user_id)
+            return
+            
+        else:
+            try:
+                user_index = int(user_input) - 1
+                if 0 <= user_index < len(users):
+                    selected_user_id = users[user_index][0]
+                    follower_utils.showFollowerDetails(selected_user_id)
+                else:
+                    print_location(8, 0, "Invalid selection. Try again.")
+            except ValueError:
+                print_location(8, 0, "Invalid input. Try again.")
+        
+def get_users_list(keyword, offset=0, limit=5):
+    cursor = CURSOR
+    user_id = CURRENT_USER_ID
+    
     CURSOR.execute('''
             SELECT usr, name FROM users 
             WHERE name LIKE ?
@@ -166,33 +215,10 @@ def search_users(cursor, current_user_id):
     
     users = CURSOR.fetchall()
     
-    if not users:
-        print_location(5, 0, "No users found.")
-        
-    print_location(5, 0, "Users found: ")
-    for index, (usr, name) in enumerate(users, start=1):
-            print_location(5 + index, 4, f"{index}. {name} (User ID: {usr})")
-            
-    move_cursor(5+index,0)
-    # Get user input to proceed
-    user_input = input("\nEnter 'n' to see more, user number to view details, or 'q' to quit: ").strip().lower()
-        
-    if user_input == 'n':
-        offset += 5
-    elif user_input == 'q':
-        exit()
+    if users:
+        return users
     else:
-        try:
-            user_index = int(user_input) - 1
-            if 0 <= user_index < len(users):
-                selected_user_id = users[user_index][0]
-                follower_utils.showFollowerDetails(selected_user_id, 7 + index)
-            else:
-                print_location(8, 0, "Invalid selection. Try again.")
-        except ValueError:
-            print_location(8, 0, "Invalid input. Try again.")
-        
-    
+        return None   
 
 def main():
     os.system("")  # Clear console

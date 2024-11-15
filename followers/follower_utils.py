@@ -20,7 +20,7 @@ def getFollowers(user_id, cursor, row):
     offset = 0 # The starting point for fetching followers.
     follower_ids = []  # To keep track of all follower IDs
     while True:
-        print("*** YOUR FOLLOWER LIST ***")
+        print("\n\n*** YOUR FOLLOWER LIST ***\n")
         # Get the list of followers with pagination
         followers = getFollowerList(offset=offset, limit=5)
 
@@ -36,7 +36,7 @@ def getFollowers(user_id, cursor, row):
         else:
             print("No more followers")
 
-        user_input = input("\nEnter 'User ID' to check user detail, 'n' to see more followers, or 'q' to go back to Main Menu: ").strip().lower()
+        user_input = input("\nEnter 'User ID' to check user detail, 'n' to see more followers, 'q' to quit, or 's' for Main Menu: ").strip().lower()
         if user_input == 'n':
             next_followers = getFollowerList(offset=offset + 5, limit=5)
             if next_followers:  # Only load more if there are more followers
@@ -100,7 +100,7 @@ def showFollowerDetails(follower_id):
 
       """
 
-    print("*** FOLLOWER DETAIL ***")
+    print("\n\n*** FOLLOWER DETAIL ***\n")
     
     cursor = CURSOR
     cursor.execute("SELECT name, email, phone FROM users WHERE usr = ?", (follower_id,))
