@@ -1,7 +1,8 @@
 import os
 import sys
+
 import sqlite3
-from followers import *
+from followers import follower_utils
 from common_utils import *
 
 CONN = None
@@ -82,7 +83,7 @@ def registered_user():
     password = input("Enter Password: ").strip()
     
     # Query to check if the user exists and the password is correct
-    global CURSOR
+    # global CURSOR
     CURSOR.execute("SELECT * FROM users WHERE upper(name) = ? AND pwd = ?", (user_name.upper(), password))
     user = CURSOR.fetchone()
     
@@ -162,33 +163,33 @@ def connect(path):
     CONN.commit()
     return
 
-def system_functions():
-    clear_screen()
-    print_location(1,0, '*** SYSTEM FUNCTIONALITIES ***')
-    print_location(3, 0,'1. Search for tweets')
-    print_location(4, 0,'2. Search for users')
-    print_location(5, 0,'3. Compose a tweet')
-    print_location(6, 0,'4. List followers')
-    print_location(7, 0,'5. Logout')
-    user_input = input("")
-    
-    if user_input == '1' or user_input == '1.':
-        #search for tweets function to be added by luke
-        pass 
-    elif user_input == '2' or user_input == '2.':
-        # search for users to be added by anant
-        pass
-    elif user_input == '3' or user_input == '3.':
-        # compose a tweet function to be added by gurbaaz
-        pass
-    elif user_input == '4' or user_input == '4.':
-        # list followers to be added by yuheng
-        pass
-    elif user_input == '5' or user_input == '5.':
-        # logout function to be added
-        pass
-    
-    return
+# def system_functions():
+#     clear_screen()
+#     print_location(1,0, '*** SYSTEM FUNCTIONALITIES ***')
+#     print_location(3, 0,'1. Search for tweets')
+#     print_location(4, 0,'2. Search for users')
+#     print_location(5, 0,'3. Compose a tweet')
+#     print_location(6, 0,'4. List followers')
+#     print_location(7, 0,'5. Logout')
+#     user_input = input("")
+#
+#     if user_input == '1' or user_input == '1.':
+#         #search for tweets function to be added by luke
+#         pass
+#     elif user_input == '2' or user_input == '2.':
+#         # search for users to be added by anant
+#         pass
+#     elif user_input == '3' or user_input == '3.':
+#         # compose a tweet function to be added by gurbaaz
+#         pass
+#     elif user_input == '4' or user_input == '4.':
+#         # list followers to be added by yuheng
+#         pass
+#     elif user_input == '5' or user_input == '5.':
+#         # logout function to be added
+#         pass
+#
+#     return
 
 def main():
     os.system("")  # Clear console

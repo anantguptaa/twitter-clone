@@ -1,5 +1,6 @@
 import sqlite3
 from common_utils import *
+from main import system_functions
 
 CURRENT_USR = None
 CURSOR = None
@@ -27,15 +28,7 @@ def getFollowers(user_id, cursor, row):
     
 
     while True:
-        cursor.execute(
-        '''
-            SELECT u.usr, u.name FROM follows f
-            JOIN users u ON f.flwer = u.usr
-            WHERE f.flwee = ?
-            LIMIT 5 OFFSET ?
-        ''', (user_id, offset))
-
-        followers = cursor.fetchall()
+        followers = getFollowerList(offset=offset, limit=5)
         if not followers:
             print_location(row, 0, "No followers to show.")
             break
@@ -110,7 +103,7 @@ def getFollowerList(offset=0, limit=5):
     else:
         return None
 
-def showFollowerDetails(follower_id):
+def showFollowerDetails(follower_id, row):
     """
       Displays detailed information about a specific follower, including contact info,
       tweet counts, and latest tweets.
@@ -175,7 +168,7 @@ def showFollowerDetails(follower_id):
     else:
         print_location(row, 0, "Follower not found.")
 
-def followUser(follower_id):
+def followUser(follower_id, row):
     """
         Allows the current user to follow another user if they are not already following them.
 
