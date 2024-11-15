@@ -111,7 +111,7 @@ def user_feed():
         tweets = get_feed_tweets(offset=offset, limit=limit)
 
         if tweets:
-            print("\n*** YOUR FEED ***")
+            print("\n*** YOUR FEED ***\n")
             print(f"{'User':<20}{'Tweet':<50}{'Date'}")
             print("-" * 80)
 
