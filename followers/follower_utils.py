@@ -2,13 +2,13 @@ import sqlite3
 from common_utils import *
 from main import system_functions
 
-CURRENT_USR = None
+CURRENT_USER_ID = None
 CURSOR = None
 
 def showFollowers(user_id, cursor):
-    global CURRENT_USR, CURSOR
+    global CURRENT_USER_ID, CURSOR
 
-    CURRENT_USR = user_id
+    CURRENT_USER_ID = user_id
     CURSOR = cursor
     """
       Retrieves and displays a list of followers for the given user, in groups of five.
@@ -70,7 +70,7 @@ def getFollowerList(offset=0, limit=5):
         limit (int): The number of followers to fetch in each request (default is 5).
     """
     cursor = CURSOR
-    user_id = CURRENT_USR
+    user_id = CURRENT_USER_ID
 
     cursor.execute('''
         SELECT u.usr, u.name 
@@ -165,7 +165,7 @@ def followUser(follower_id):
         Parameters:
             follower_id (int): The ID of the user to follow.
         """
-    user_id = CURRENT_USR
+    user_id = CURRENT_USER_ID
     cursor = CURSOR
 
 
@@ -193,7 +193,7 @@ def isFollowing(follower_id):
            follower_id (int): The ID of the user to check.
        """
 
-    user_id = CURRENT_USR
+    user_id = CURRENT_USER_ID
     cursor = CURSOR
     cursor.execute(
         """
