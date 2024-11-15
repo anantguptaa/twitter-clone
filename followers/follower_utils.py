@@ -139,7 +139,7 @@ def showFollowerDetails(follower_id):
                 if(isFollowing(follower_id)):
                     print("You have followed her/him")
                 else:
-                    followUser(follower_id)  # Assuming you have the followUser function implemented
+                    followUser(follower_id) #if not followed, call the function to follow
 
             elif user_input == 't':
                 # # View more tweets (next 3 tweets)
