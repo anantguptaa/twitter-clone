@@ -25,8 +25,6 @@ def getFollowers(user_id, cursor, row):
        """
 
     offset = 0
-    
-
     while True:
         followers = getFollowerList(offset=offset, limit=5)
         if not followers:
@@ -229,10 +227,6 @@ def viewTweets(follower_id, offset=0, limit=3):
         follower_id (int): The ID of the follower whose tweets are to be shown.
         offset (int): The offset (starting point) for fetching tweets (default is 0).
         limit (int): The number of tweets to fetch in each request (default is 3).
-
-    Functionality:
-        - Fetches and displays tweets from the specified follower.
-        - Allows pagination by adjusting the offset.
     """
 
     cursor = CURSOR
