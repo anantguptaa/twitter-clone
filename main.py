@@ -1,7 +1,8 @@
 import os
 import sys
 import sqlite3
-from followers import follower_utils
+from followers import *
+from common_utils import *
 
 CONN = None
 CURSOR = None
@@ -12,25 +13,25 @@ ANSI = {
     "CLEARLINE": "\033[0K"  # Clear line
 }
 
-def print_location(x, y, text):
-    '''
-    ## Print text at specified location
+# def print_location(x, y, text):
+#     '''
+#     ## Print text at specified location
+#
+#     ### Args:
+#         - `x (int)`: x - coordinate
+#         - `y (_type_)`: y - coordinate
+#         - `text (_type_)`: The text to be printed
+#     '''
+#     print("\033[{1};{0}H{2}".format(y, x, text))
 
-    ### Args:
-        - `x (int)`: x - coordinate
-        - `y (_type_)`: y - coordinate
-        - `text (_type_)`: The text to be printed
-    '''    
-    print("\033[{1};{0}H{2}".format(y, x, text))
-
-def clear_screen():
-    '''
-    ## Clear the terminal screen
-    '''    
-    if os.name == "nt":  # for Windows
-            os.system("cls")
-    else:                # for Mac/Linux
-        os.system("clear")    
+# def clear_screen():
+#     '''
+#     ## Clear the terminal screen
+#     '''
+#     if os.name == "nt":  # for Windows
+#             os.system("cls")
+#     else:                # for Mac/Linux
+#         os.system("clear")
     
 def move_cursor(x, y):
     '''
@@ -74,7 +75,7 @@ def registered_user():
     if user:
         USER_ID = user_id  # After Sucessfully login, assign current usrId to the global variable USER_ID
         print_location(3, 0, "Login successful!")
-        # follower_utils.getFollowers(user_id, CURSOR)
+        follower_utils.displayFollowers(user_id, CURSOR)
         display_feed(user_id)
     else:
         print_location(3, 0, "Invalid user ID or password.")
