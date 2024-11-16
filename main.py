@@ -41,6 +41,8 @@ def login_screen():
                 move_cursor(6,5)
                 print(ANSI["CLEARLINE"], end="\r")
         except ValueError:
+            move_cursor(7,0)
+            print(ANSI["CLEARLINE"], end="\r")
             print_location(7, 0, "Please enter a valid number.")
             move_cursor(6,5)
             print(ANSI["CLEARLINE"], end="\r")
@@ -76,7 +78,7 @@ def registered_user():
             
             CURRENT_USER_ID = user[0]  # After a successful login, assign the user ID to CURRENT_USER_ID
             move_cursor(8,0)
-            user_feed()  # need to test this function
+            user_feed(CURSOR, CURRENT_USER_ID)
             break  # Exit the loop if login is successful
         
         else:
@@ -148,29 +150,40 @@ def system_functions(cursor, current_user_id):
     CURSOR = cursor
     CURRENT_USER_ID = current_user_id
     
+    clear_screen()
+    print_location(1,0, '*** SYSTEM FUNCTIONALITIES ***')
+    print_location(3, 0,'1. Search for tweets')
+    print_location(4, 0,'2. Search for users')
+    print_location(5, 0,'3. Compose a tweet')
+    print_location(6, 0,'4. List followers')
+    print_location(7, 0,'5. Logout')
+    
     while True:
-      clear_screen()
-      print_location(1,0, '*** SYSTEM FUNCTIONALITIES ***')
-      print_location(3, 0,'1. Search for tweets')
-      print_location(4, 0,'2. Search for users')
-      print_location(5, 0,'3. Compose a tweet')
-      print_location(6, 0,'4. List followers')
-      print_location(7, 0,'5. Logout')
+        try:
+            user_input = int(input(">>> "))
+            if user_input == 1:
+                search_tweets(CURSOR, CURRENT_USER_ID)
+            elif user_input == 2:
+                search_users(CURSOR, CURRENT_USER_ID)
+            elif user_input == 3:
+                compose_tweet(CURSOR)
+            elif user_input == 4:
+                follower_utils.showFollowers(CURRENT_USER_ID, CURSOR)
+            elif user_input == 5:
+                logout()
+            else:
+                move_cursor(9,0)
+                print(ANSI["CLEARLINE"], end="\r")
+                print_location(9, 0, "Invalid input! Please choose a valid number.")
+                move_cursor(8,5)
+                print(ANSI["CLEARLINE"], end="\r")   
 
-      user_input = input(">>>")
-      
-      if user_input == '1' or user_input == '1.':
-          search_tweets(CURSOR, CURRENT_USER_ID)
-      elif user_input == '2' or user_input == '2.':
-          search_users(CURSOR, CURRENT_USER_ID)
-      elif user_input == '3' or user_input == '3.':
-          compose_tweet(CURSOR)
-      elif user_input == '4' or user_input == '4.':
-          follower_utils.showFollowers(CURRENT_USER_ID, CURSOR)
-      elif user_input == '5' or user_input == '5.':
-          logout()     
-
-    return
+        except ValueError:
+            move_cursor(9,0)
+            print(ANSI["CLEARLINE"], end="\r")
+            print_location(9, 0, "Please enter a valid number.")
+            move_cursor(8,5)
+            print(ANSI["CLEARLINE"], end="\r")
         
 def compose_tweet(cursor):
     global CURSOR

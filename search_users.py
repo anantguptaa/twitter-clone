@@ -1,9 +1,13 @@
-from main import system_functions
 from followers import follower_utils
 from common_utils import *
 
+CURRENT_USER_ID = None
+CURSOR = None
+
 def search_users(cursor, current_user_id):
     global CURSOR, CURRENT_USER_ID
+    CURSOR = cursor
+    CURRENT_USER_ID = current_user_id
     clear_screen()
     print_location(1,0,"*** SEARCH FOR USERS ***")
     
@@ -48,6 +52,7 @@ def search_users(cursor, current_user_id):
             exit()
             
         elif user_input == 's':
+            from main import system_functions
             system_functions(cursor, current_user_id)
             return
             
@@ -80,19 +85,22 @@ def get_users_list(keyword, offset=0, limit=5):
     else:
         return None   
 
-def user_feed():
+def user_feed(cursor , current_user_id):
     """
     Displays all tweets and retweets from users the current user is following.
     Uses the existing `viewTweets` function for pagination.
     """
     global CURRENT_USER_ID, CURSOR
+    
+    CURSOR = cursor
+    CURRENT_USER_ID = current_user_id
 
     offset = 0  # Starting point for pagination
     limit = 5  # Number of tweets to display per page
 
     while True:
         # Fetch tweets and retweets from the users the current user is following
-        tweets = get_feed_tweets(offset=offset, limit=limit)
+        tweets = get_feed_tweets(CURSOR, offset=offset, limit=limit)
 
         if tweets:
             print("\n*** YOUR FEED ***\n")
@@ -114,11 +122,12 @@ def user_feed():
         elif user_input == 'q':
             break
         elif user_input == 's':
+            from main import system_functions
             system_functions(CURSOR, CURRENT_USER_ID)
         else:
             print("Invalid input. Please try again.")
 
-def get_feed_tweets(offset=0, limit=5):
+def get_feed_tweets(cursor, offset=0, limit=5):
     """
     Retrieves tweets and retweets for the current user from followed users.
 
@@ -131,6 +140,7 @@ def get_feed_tweets(offset=0, limit=5):
     """
     global CURSOR, CURRENT_USER_ID
 
+    CURSOR = cursor
     CURSOR.execute('''
         SELECT writer_id, name, text, date FROM (
             -- Original tweets
