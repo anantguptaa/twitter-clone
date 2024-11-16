@@ -1,4 +1,4 @@
-# Importying files
+# Importing files
 import sys      # Used to take command line inputs
 import sqlite3  # Used to access database
 
