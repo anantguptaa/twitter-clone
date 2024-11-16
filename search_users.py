@@ -57,6 +57,8 @@ def search_users(cursor, current_user_id):
                     print_location(5 + len(users) + index, 4, f"{index}. {name} (User ID: {usr})")
                 users.extend(next_users)  # Add the new users to the list
             else:
+                move_cursor(8 + len(users),0)
+                print(ANSI["CLEARLINE"], end="\r")
                 print_location(8 + len(users), 0, "No more users to display.")
                 move_cursor(7+index, 91)
                 print(ANSI["CLEARLINE"], end="\r")

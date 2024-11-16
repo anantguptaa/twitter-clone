@@ -90,7 +90,7 @@ def getFollowerList(offset=0, limit=5):
     else:
         return None
 
-def showFollowerDetails(follower_id):
+def showFollowerDetails(follower_id, cursor):
     """
       Displays detailed information about a specific follower, including contact info,tweet counts, and latest tweets.
       Offers options to follow this follower, see more tweets, or go back.
@@ -101,8 +101,9 @@ def showFollowerDetails(follower_id):
       """
 
     print("\n\n*** FOLLOWER DETAIL ***\n")
-  
-    cursor = CURSOR
+    
+    global CURSOR
+    CURSOR = cursor
     cursor.execute("SELECT name, email, phone FROM users WHERE usr = ?", (follower_id,))
     follower = cursor.fetchone()
 
@@ -213,7 +214,7 @@ def viewTweets(follower_id, offset=0, limit=3):
         offset (int): starting point for fetching tweets (default is 0).
         limit (int): The number of tweets to fetch in each request (default is 3).
     """
-
+    
     cursor = CURSOR
     cursor.execute('''
         SELECT text, tdate FROM tweets
