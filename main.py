@@ -204,12 +204,12 @@ def system_functions(cursor, current_user_id):
                 move_cursor(8,5)
                 print(ANSI["CLEARLINE"], end="\r")   
 
-    except ValueError:
-        move_cursor(9,0)
-        print(ANSI["CLEARLINE"], end="\r")
-        print_location(9, 0, "Please enter a valid number.")
-        move_cursor(8,5)
-        print(ANSI["CLEARLINE"], end="\r")
+        except ValueError:
+            move_cursor(9,0)
+            print(ANSI["CLEARLINE"], end="\r")
+            print_location(9, 0, "Please enter a valid number.")
+            move_cursor(8,5)
+            print(ANSI["CLEARLINE"], end="\r")
         
           
 
