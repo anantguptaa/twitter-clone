@@ -183,32 +183,31 @@ def system_functions(cursor, current_user_id):
     print_location(6, 0,'4. List followers')
     print_location(7, 0,'5. Logout')
     
-    while True:
-        try:
-            user_input = int(input(">>> "))
-            if user_input == 1:
-                search_tweets(CURSOR, CURRENT_USER_ID)
-            elif user_input == 2:
-                search_users(CURSOR, CURRENT_USER_ID)
-            elif user_input == 3:
-                compose_tweet(CURSOR)
-            elif user_input == 4:
-                follower_utils.showFollowers(CURRENT_USER_ID, CURSOR)
-            elif user_input == 5:
-                logout()
-            else:
-                move_cursor(9,0)
-                print(ANSI["CLEARLINE"], end="\r")
-                print_location(9, 0, "Invalid input! Please choose a valid number.")
-                move_cursor(8,5)
-                print(ANSI["CLEARLINE"], end="\r")   
-
-        except ValueError:
+    try:
+        user_input = int(input(">>> "))
+        if user_input == 1:
+            search_tweets(CURSOR, CURRENT_USER_ID)
+        elif user_input == 2:
+            search_users(CURSOR, CURRENT_USER_ID)
+        elif user_input == 3:
+            compose_tweet(CURSOR)
+        elif user_input == 4:
+            follower_utils.showFollowers(CURRENT_USER_ID, CURSOR)
+        elif user_input == 5:
+            logout()
+        else:
             move_cursor(9,0)
             print(ANSI["CLEARLINE"], end="\r")
-            print_location(9, 0, "Please enter a valid number.")
+            print_location(9, 0, "Invalid input! Please choose a valid number.")
             move_cursor(8,5)
-            print(ANSI["CLEARLINE"], end="\r")
+            print(ANSI["CLEARLINE"], end="\r")   
+
+    except ValueError:
+        move_cursor(9,0)
+        print(ANSI["CLEARLINE"], end="\r")
+        print_location(9, 0, "Please enter a valid number.")
+        move_cursor(8,5)
+        print(ANSI["CLEARLINE"], end="\r")
         
 def compose_tweet(cursor):
     global CURSOR
