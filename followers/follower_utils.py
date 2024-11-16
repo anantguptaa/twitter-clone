@@ -47,8 +47,8 @@ def showFollowers(user_id, cursor):
         elif user_input == 'q':
             exit()  # exit the loop, go back to Main Menu
         elif user_input == 's':
-            # system_functions(cursor, user_id)
-            break
+            system_functions(cursor, user_id)
+            # break
         else:
             follower_id = int(user_input)
             if follower_id in follower_ids:

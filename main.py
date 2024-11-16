@@ -79,6 +79,7 @@ def registered_user():
             move_cursor(6,0)
             print(ANSI["CLEARLINE"], end="\r") # Clear anything written previulsy in that line
             print_location(6, 0, "Login successful!")
+            input("Press Enter to continue......")
             
             CURRENT_USER_ID = user[0]  # After a successful login, assign the user ID to CURRENT_USER_ID
             move_cursor(8,0)
@@ -203,12 +204,12 @@ def system_functions(cursor, current_user_id):
                 move_cursor(8,5)
                 print(ANSI["CLEARLINE"], end="\r")   
 
-        except ValueError:
-            move_cursor(9,0)
-            print(ANSI["CLEARLINE"], end="\r")
-            print_location(9, 0, "Please enter a valid number.")
-            move_cursor(8,5)
-            print(ANSI["CLEARLINE"], end="\r")
+    except ValueError:
+        move_cursor(9,0)
+        print(ANSI["CLEARLINE"], end="\r")
+        print_location(9, 0, "Please enter a valid number.")
+        move_cursor(8,5)
+        print(ANSI["CLEARLINE"], end="\r")
         
           
 

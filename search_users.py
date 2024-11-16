@@ -9,15 +9,17 @@ def search_users(cursor, current_user_id):
     CURSOR = cursor
     CURRENT_USER_ID = current_user_id
     clear_screen()
-    print_location(1,0,"*** SEARCH FOR USERS ***")
+    print_location(1, 0, "*** SEARCH FOR USERS ***")
+    
+    offset = 0
+    limit = 5
     
     while True:
         print_location(3, 0, "Enter Keyword: ")
-        move_cursor (3, 16)
+        move_cursor(3, 16)
         keyword = input("").strip()
         
-        offset = 0
-        limit = 5
+        # Fetch users based on the keyword, offset, and limit
         users = get_users_list(keyword, offset, limit)
     
         if not users:
@@ -26,46 +28,65 @@ def search_users(cursor, current_user_id):
             print(ANSI["CLEARLINE"], end="\r")
             continue
         
-        move_cursor(5,0)
+        move_cursor(5, 0)
         print(ANSI["CLEARLINE"], end="\r")
         print_location(5, 0, "Users found: ")
+        
         for index, (usr, name) in enumerate(users, start=1):
-                print_location(5 + index, 4, f"{index}. {name} (User ID: {usr})")
-        move_cursor(5+index,0)
-        break
+            print_location(5 + index, 4, f"{index}. {name} (User ID: {usr})")
+        
+        move_cursor(5 + index, 0)
+        break  # Exit the loop once users are displayed
     
-    # Extract the user IDs
+    # Extract the user IDs from the result for validation
     valid_user_ids = [user[0] for user in users]
     
+    print_location(7 + index,0,"Enter 'n' to see more, 'User ID' to view user details, 'q' to quit, or 's' for Main Menu: ")
     while True:
-        # Get user input to proceed
-        user_input = input("\nEnter 'n' to see more, 'User ID' to view user details, 'q' to quit, or 's' for Main Menu: ").strip().lower()
+        move_cursor(7 + index, 91)
+        user_input = input("").strip().lower()
 
         if user_input == 'n':
-            next_followers = get_users_list(keyword, offset=offset + 5, limit=5)
-            if next_followers:  # Only load more if there are more followers
-                offset += 5  # Move to the next page
-            else:
-                print("No more users to display")
-                
-        elif user_input == 'q':
-            exit()
+            # Load the next page of users
+            offset += 5  # Move to the next set of users
+            next_users = get_users_list(keyword, offset=offset, limit=limit)
             
+            if next_users:  # Only display more users if there are more
+                print_location(5 + len(users), 0, "Users found: ")
+                for index, (usr, name) in enumerate(next_users, start=1):
+                    print_location(5 + len(users) + index, 4, f"{index}. {name} (User ID: {usr})")
+                users.extend(next_users)  # Add the new users to the list
+            else:
+                print_location(8 + len(users), 0, "No more users to display.")
+                move_cursor(7+index, 91)
+                print(ANSI["CLEARLINE"], end="\r")
+                
+        
+        elif user_input == 'q':
+            exit()  # Exit the program
+        
         elif user_input == 's':
             from main import system_functions
-            system_functions(cursor, current_user_id)
+            system_functions(cursor, current_user_id)  # Return to the main menu
             return
-            
+    
         else:
             try:
-                # Check if the input is a valid user ID
+                # Validate if the input is a valid user ID
                 user_id = int(user_input)
                 if user_id in valid_user_ids:
+                    # Show the details of the selected user
+                    move_cursor(8 + len(users), 0)
+                    print(ANSI["CLEARLINE"], end="\r")
                     follower_utils.showFollowerDetails(user_id, CURSOR)
                 else:
-                    print("\nInvalid User ID. Please try again.")
+                    print("Invalid User ID. Please try again.")
+                    move_cursor(7+index, 91)
+                    print(ANSI["CLEARLINE"], end="\r")
             except ValueError:
-                print("\nInvalid input. Please enter a valid User ID.")
+                print("Invalid input. Please enter a valid User ID.")
+                move_cursor(7+index, 91)
+                print(ANSI["CLEARLINE"], end="\r")
 
 def get_users_list(keyword, offset=0, limit=5):
     cursor = CURSOR
@@ -85,7 +106,7 @@ def get_users_list(keyword, offset=0, limit=5):
     else:
         return None   
 
-def user_feed(cursor , current_user_id):
+def user_feed(cursor, current_user_id):
     """
     Displays all tweets and retweets from users the current user is following.
     Uses the existing `viewTweets` function for pagination.
@@ -98,42 +119,51 @@ def user_feed(cursor , current_user_id):
     offset = 0  # Starting point for pagination
     limit = 5  # Number of tweets to display per page
 
-    # Fetch tweets and retweets from the users the current user is following
-    tweets = get_feed_tweets(CURSOR, offset=offset, limit=limit)
+    # Clear the previous screen output
     clear_screen()
     print_location(1, 0, "*** YOUR FEED ***\n")
-    if tweets:
-        print(f"{'User':<20}{'Tweet':<50}{'Date'}")
-        print("-" * 80)
 
-        for writer_id, name, text, tdate in tweets:
-            print(f"{name:<20}{text[:45]:<50}{tdate}")
-    else:
-        if offset == 0:
-            print("Your feed is empty. Start following users to see their tweets!")
+    while True:
+        # Fetch tweets and retweets from the users the current user is following
+        tweets = get_feed_tweets(CURSOR, offset=offset, limit=limit)
+
+        if tweets:
+            print_location(3, 0, f"{'User':<20}{'Tweet':<50}{'Date'}")
+            print_location(4, 0, "-" * 80)
+
+            # Display each tweet or retweet
+            for index, (writer_id, name, text, tdate) in enumerate(tweets, start=1):
+                print_location(4 + index, 0, f"{name:<20}{text[:45]:<50}{tdate}")
+            row = len(tweets)
         else:
-            print("No more tweets to display.")
+            if offset == 0:
+                print_location(3, 0, "Your feed is empty. Start following users to see their tweets!")
+            else:
+                print_location(8 + row, 0, "No more tweets to display.")
+                move_cursor(7 + row, 65)
+                print(ANSI["CLEARLINE"], end="\r")
+                
 
     while True:
 
         # User prompt for further actions
-        move_cursor(12, 0)
-        print(ANSI["CLEARLINE"], end="\r")
-
-        print_location(12, 0, "Enter 'n' for next 5 tweets,'q' to exit, or 's' for Main Menu: " )
-        move_cursor(12, 65)
+        print_location(7 + row, 0, "Enter 'n' for next 5 tweets, 'q' to exit, or 's' for Main Menu: ")
+        move_cursor(7 + row, 65)
         user_input = input("").strip().lower()
+
         if user_input == 'n':
-            offset += limit  # Increment offset to fetch the next set of tweets
+            offset+=5
         elif user_input == 'q':
-            clear_screen()
             exit()
         elif user_input == 's':
             from main import system_functions
             clear_screen()
             system_functions(CURSOR, CURRENT_USER_ID)
         else:
-            print_location(11, 0, "Invalid input. Please try again.")
+            print_location(8 + row, 0, "Invalid input. Please try again.")
+            move_cursor(8 + row, 91)
+            print(ANSI["CLEARLINE"], end="\r")
+
 
 def get_feed_tweets(cursor, offset=0, limit=5):
     """
