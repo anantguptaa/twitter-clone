@@ -2,7 +2,7 @@ from datetime import datetime
 
 def search_tweets(cursor, user_id):
     """
-    Search for tweets based on keywords and allow the user to reply or retweet.
+    Search for tweets based on keywords and display options to reply, retweet, or view replies.
     :param cursor: SQLite database cursor for executing queries.
     :param user_id: The ID of the user currently logged in.
     """
@@ -39,11 +39,23 @@ def search_tweets(cursor, user_id):
             if 0 <= selected_index < len(results):
                 tweet_id, tweet_text, tweet_date, tweet_time = results[selected_index]
                 
+                # Fetch tweet statistics
+                cursor.execute("SELECT COUNT(*) FROM retweets WHERE tid = ?", (tweet_id,))
+                retweet_count = cursor.fetchone()[0]
+                
+                cursor.execute("SELECT COUNT(*) FROM tweets WHERE replyto_tid = ?", (tweet_id,))
+                reply_count = cursor.fetchone()[0]
+                
                 print(f"\nSelected Tweet: {tweet_text}")
-                print("Options: ")
+                print(f"Date: {tweet_date} Time: {tweet_time}")
+                print(f"Retweets: {retweet_count}, Replies: {reply_count}")
+                
+                # Interaction options
+                print("\nOptions: ")
                 print("1. Reply to this tweet")
                 print("2. Retweet this tweet")
-                print("3. Cancel")
+                print("3. View replies")
+                print("4. Cancel")
                 
                 action = input("Choose an action: ").strip()
                 if action == '1':
@@ -51,6 +63,8 @@ def search_tweets(cursor, user_id):
                 elif action == '2':
                     retweet_tweet(cursor, user_id, tweet_id)
                 elif action == '3':
+                    view_replies(cursor, tweet_id)
+                elif action == '4':
                     print("Cancelled.")
                 else:
                     print("Invalid choice.")
@@ -90,14 +104,12 @@ def retweet_tweet(cursor, user_id, tweet_id):
     :param user_id: The ID of the user currently logged in.
     :param tweet_id: The ID of the tweet to retweet.
     """
-    # Fetch the original tweet's writer_id
     cursor.execute("SELECT writer_id FROM tweets WHERE tid = ?", (tweet_id,))
     result = cursor.fetchone()
     
     if result:
         original_writer_id = result[0]
         timestamp = datetime.now()
-        
         cursor.execute(
             """
             INSERT INTO retweets (tid, retweeter_id, writer_id, spam, rdate)
@@ -109,4 +121,30 @@ def retweet_tweet(cursor, user_id, tweet_id):
         print("Tweet retweeted successfully!")
     else:
         print("Error: Unable to retweet. Original tweet not found.")
+
+def view_replies(cursor, tweet_id):
+    """
+    View replies to a selected tweet.
+    :param cursor: SQLite database cursor for executing queries.
+    :param tweet_id: The ID of the tweet to view replies for.
+    """
+    cursor.execute(
+        """
+        SELECT t.text, t.tdate, t.ttime, u.name
+        FROM tweets t
+        JOIN users u ON t.writer_id = u.usr
+        WHERE t.replyto_tid = ?
+        ORDER BY t.tdate ASC, t.ttime ASC
+        """, 
+        (tweet_id,)
+    )
+    replies = cursor.fetchall()
+    
+    if replies:
+        print("\nReplies:")
+        for i, (text, tdate, ttime, writer_name) in enumerate(replies, start=1):
+            print(f"{i}. {tdate} {ttime} - {writer_name}: {text}")
+    else:
+        print("No replies for this tweet.")
+
 
