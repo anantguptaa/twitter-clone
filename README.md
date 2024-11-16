@@ -10,9 +10,9 @@ Group member names and ccids (3-4 members)
 
 # Group work break-down strategy
 Luke Thomas - Part 1, database creation and readme file
-Yuheng Li - Part 4, optimizations, pdf file and edits
-Anant Gupta - Login, Part 2, main.py creation and documentation/edits
-Gurbaaz Gill - Logout, Part 3 and documentation/edits
+Yuheng Li - Part 4, pdf file and edits
+Anant Gupta - Login, Part 2, main.py creation, optimization of different parts and documentation/edits
+Gurbaaz Gill - Logout, Part 3, optimization of different parts and documentation/edits
 
 # Code execution guide
 Open the terminal and direct to the folder that contains the source code and database. 
