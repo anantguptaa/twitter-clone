@@ -1,4 +1,5 @@
 from datetime import datetime
+from common_utils import *
 
 def search_tweets(cursor, user_id):
     """
@@ -6,6 +7,10 @@ def search_tweets(cursor, user_id):
     :param cursor: SQLite database cursor for executing queries.
     :param user_id: The ID of the user currently logged in.
     """
+    global USER_ID
+    USER_ID = user_id
+
+    clear_screen()
     print("*** TWEET SEARCH ***")
     
     # Prompt for search keywords
@@ -57,23 +62,32 @@ def search_tweets(cursor, user_id):
                 print("3. View replies")
                 print("4. Cancel")
                 
-                action = input("Choose an action: ").strip()
-                if action == '1':
-                    reply_to_tweet(cursor, user_id, tweet_id)
-                elif action == '2':
-                    retweet_tweet(cursor, user_id, tweet_id)
-                elif action == '3':
-                    view_replies(cursor, tweet_id)
-                elif action == '4':
-                    print("Cancelled.")
-                else:
-                    print("Invalid choice.")
+                not_selected = True
+                while not_selected:
+                    action = input("Choose an action: ").strip()
+                    if action == '1':
+                        reply_to_tweet(cursor, user_id, tweet_id)
+                        not_selected = False
+                    elif action == '2':
+                        retweet_tweet(cursor, user_id, tweet_id)
+                        not_selected = False
+                    elif action == '3':
+                        view_replies(cursor, tweet_id)
+                        not_selected = False
+                    elif action == '4':
+                        print("Cancelled.")
+                        not_selected = False
+                    else:
+                        print("Invalid choice. Please Try Again")
             else:
                 print("Invalid selection.")
     else:
         print("No tweets found with the given keywords.")
     
     input("\nPress Enter to return to the main menu...")
+    clear_screen(    )
+    from main import system_functions
+    system_functions(cursor, user_id)
 
 def reply_to_tweet(cursor, user_id, tweet_id):
     """
@@ -140,6 +154,10 @@ def reply_to_tweet(cursor, user_id, tweet_id):
 
     cursor.connection.commit()
     print("Reply posted successfully!")
+    input("\nPress Enter to return to the main menu...")
+    clear_screen()
+    from main import system_functions
+    system_functions(cursor, user_id)
 
 
 def retweet_tweet(cursor, user_id, tweet_id):
@@ -164,6 +182,10 @@ def retweet_tweet(cursor, user_id, tweet_id):
         )
         cursor.connection.commit()
         print("Tweet retweeted successfully!")
+        input("\nPress Enter to return to the main menu...")
+        clear_screen(    )
+        from main import system_functions
+        system_functions(cursor, user_id)
     else:
         print("Error: Unable to retweet. Original tweet not found.")
 
@@ -191,5 +213,9 @@ def view_replies(cursor, tweet_id):
             print(f"{i}. {tdate} {ttime} - {writer_name}: {text}")
     else:
         print("No replies for this tweet.")
+    input("\nPress Enter to return to the main menu...")
+    clear_screen(    )
+    from main import system_functions
+    system_functions(cursor, USER_ID)
 
 

@@ -19,20 +19,23 @@ def compose_tweet(cursor, CURRENT_USER_ID):
         tweet_text = input("")
         valid = True
 
-        # making list of input words
-        input_terms = tweet_text.split(" ")
-        hashtag = []
-        for term in input_terms:
-            if term[0] == "#" and len(term) > 1:
-                if term.lower() not in hashtag:
-                    hashtag.append(term.lower())
-                else:
-                    move_cursor(4, 0)
-                    print(ANSI["CLEARLINE"], end="\r")
-                    print_location(4, 0, "Please try again: Duplicate hashtags are not allowed!")
-                    valid = False
-        if valid:
-            inp = False
+        if tweet_text:
+            # making list of input words
+            input_terms = tweet_text.split(" ")
+            hashtag = []
+            for term in input_terms:
+                if term[0] == "#" and len(term) > 1:
+                    if term.lower() not in hashtag:
+                        hashtag.append(term.lower())
+                    else:
+                        move_cursor(4, 0)
+                        print(ANSI["CLEARLINE"], end="\r")
+                        print_location(4, 0, "Please try again: Duplicate hashtags are not allowed!")
+                        valid = False
+            if valid:
+                inp = False
+        else:
+            print_location(4, 0, "Please try again: Empty tweets are not allowed")
 
 
     CURSOR.execute(
@@ -84,7 +87,7 @@ def compose_tweet(cursor, CURRENT_USER_ID):
         move_cursor(9, 75)
         user_input = input("")
         if user_input == 'f':
-            user_feed()
+            user_feed(CURSOR, CURRENT_USER_ID)
             i = False
         elif user_input == 'q':
             exit()
