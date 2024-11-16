@@ -104,8 +104,20 @@ def unregistered_user():
     
     name = input("Enter name: ")
     email = input("Enter email: ")
-    phone = int(input("Enter phone number: "))
-    password = input("Enter password: ")
+    
+    while '@' not in email or '.' not in email:  # Simple check for '@' and '.'
+        print("Invalid email format. Please make sure the email contains '@' and a domain (e.g., 'example.com').")
+        email = input("Enter email: ").strip()
+    
+    # Get the user's phone number and ensure it's an integer
+    while True:
+        try:
+            phone = int(input("Enter phone number: ").strip())
+            break  # Exit the loop if the phone number is valid
+        except ValueError:
+            print("Invalid phone number. Please enter a valid integer.")
+
+    password = getpass("Enter password: ")
     
     # Generate a unique user ID (using max `usr` + 1 as a simple method)
     global CURSOR, CONN
@@ -124,16 +136,25 @@ def unregistered_user():
         (CURRENT_USER_ID, name, email, phone, password)
     )
     CONN.commit()
+    
     clear_screen()
     print_location(1, 0, "*** UNREGISTERED USER ***")
     print_location(3, 0, f"Sign-up successful! Your User ID is {CURRENT_USER_ID}.")
-    user_input = input("Would you like to go to the Main Menu y/n: ")
-    if user_input.lower() == 'y' :
-        system_functions(CURSOR, CURRENT_USER_ID)
-    elif user_input.lower() == 'n':
-        exit()
-    else:
-        print('Invalid Input.')
+    
+    print_location(5, 0, "Would you like to go to the Main Menu y/n: ")
+    while True:
+        move_cursor(5, 44)
+        user_input = input("")
+        
+        if user_input.lower() == 'y' :
+            system_functions(CURSOR, CURRENT_USER_ID)
+            break
+        elif user_input.lower() == 'n':
+            exit()
+        else:
+            print_location(6, 0, "Invalid Input. Please enter 'y' or 'n'.")
+            move_cursor(5, 44)
+            print(ANSI["CLEARLINE"], end="\r")
  
 def connect(path):
     global CONN, CURSOR
@@ -288,7 +309,7 @@ def logout():
     user_input = input("Press Enter to return to the login screen or 'q' to quit: ").lower()
     if user_input == 'q':
         exit()
-    registered_user()  # Redirect back to the login screen
+    login_screen()  # Redirect back to the login screen
 
 def main():
     os.system("")  # Clear console
