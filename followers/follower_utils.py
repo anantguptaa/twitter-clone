@@ -53,7 +53,7 @@ def showFollowers(user_id, cursor):
             follower_id = int(user_input)
             if follower_id in follower_ids:
                 # Show detailed information of the follower
-                showFollowerDetails(follower_id)
+                showFollowerDetails(follower_id, cursor)
                 # After viewing the details, return to the main list
                 continue  # Continue the loop to display followers
             else:
