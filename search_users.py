@@ -139,12 +139,13 @@ def get_feed_tweets(cursor, offset=0, limit=5):
         List[Tuple]: A list of tuples containing writer ID, writer name, tweet/retweet text, and tweet/retweet date.
     """
     global CURSOR, CURRENT_USER_ID
-
+    
     CURSOR = cursor
+
     CURSOR.execute('''
         SELECT writer_id, name, text, date FROM (
             -- Original tweets
-            SELECT t.writer_id, u.name, t.text, t.tdate AS date
+            SELECT t.writer_id, u.name, t.text, t.tdate AS date, t.tdate || ' ' || t.ttime AS datetime
             FROM tweets t
             JOIN follows f ON t.writer_id = f.flwee
             JOIN users u ON t.writer_id = u.usr
@@ -153,14 +154,14 @@ def get_feed_tweets(cursor, offset=0, limit=5):
             UNION ALL
 
             -- Retweets
-            SELECT r.retweeter_id AS writer_id, u.name, t.text, r.rdate AS date
+            SELECT r.retweeter_id AS writer_id, u.name, t.text, r.rdate AS date, r.rdate AS datetime
             FROM retweets r
             JOIN tweets t ON r.tid = t.tid
             JOIN follows f ON r.retweeter_id = f.flwee
             JOIN users u ON r.retweeter_id = u.usr
             WHERE f.flwer = ?
         ) combined
-        ORDER BY date DESC
+        ORDER BY datetime DESC -- Sort by combined date and time descending
         LIMIT ? OFFSET ?
     ''', (CURRENT_USER_ID, CURRENT_USER_ID, limit, offset))
 

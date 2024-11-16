@@ -19,6 +19,9 @@ def login_screen():
     '''
     ## This function prints a login screen menu and asks for input from the user.
     '''
+    clear_screen()
+    print_location(1, 0,'*** MINI PROJECT 1 ***') # Print game heading
+    print("\n")
     while True:
         print('\n')
         print_location(3, 0, '1. Registered User')
@@ -290,8 +293,6 @@ def logout():
 def main():
     os.system("")  # Clear console
     clear_screen()  # Clear the screen
-    print_location(1, 0,'*** MINI PROJECT 1 ***') # Print game heading
-    print("\n")
 
     global CURSOR, CONN
 
