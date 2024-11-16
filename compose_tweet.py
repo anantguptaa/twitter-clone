@@ -1,10 +1,10 @@
 from datetime import datetime
 from common_utils import *
-import sqlite3
+from search_users import user_feed
 
 
 def compose_tweet(cursor, CURRENT_USER_ID):
-    global CURSOR
+    CURSOR = cursor
 
     # taing input from user
     clear_screen()
@@ -17,6 +17,7 @@ def compose_tweet(cursor, CURRENT_USER_ID):
         print_location(5, 0, "Enter Tweet: ")
         move_cursor(5, 15)
         tweet_text = input("")
+        valid = True
 
         # making list of input words
         input_terms = tweet_text.split(" ")
@@ -29,8 +30,9 @@ def compose_tweet(cursor, CURRENT_USER_ID):
                     move_cursor(4, 0)
                     print(ANSI["CLEARLINE"], end="\r")
                     print_location(4, 0, "Please try again: Duplicate hashtags are not allowed!")
-                    inp = True
-        inp = False
+                    valid = False
+        if valid:
+            inp = False
 
 
     CURSOR.execute(
@@ -76,8 +78,10 @@ def compose_tweet(cursor, CURRENT_USER_ID):
 
     i = True
     while i:
+        move_cursor(9, 0)
+        print(ANSI["CLEARLINE"], end="\r")
         print_location(9, 0, "Enter 'f' to view user feed, 'm' to go back to Main Menu or 'q' to quit:  ")
-        move_cursor(9, 90)
+        move_cursor(9, 75)
         user_input = input("")
         if user_input == 'f':
             user_feed()
@@ -86,6 +90,7 @@ def compose_tweet(cursor, CURRENT_USER_ID):
             exit()
             i = False
         elif user_input == 'm':
+            from main import system_functions
             system_functions(CURSOR, CURRENT_USER_ID)
             i = False
         else:

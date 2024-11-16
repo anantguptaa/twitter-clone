@@ -98,34 +98,42 @@ def user_feed(cursor , current_user_id):
     offset = 0  # Starting point for pagination
     limit = 5  # Number of tweets to display per page
 
-    while True:
-        # Fetch tweets and retweets from the users the current user is following
-        tweets = get_feed_tweets(CURSOR, offset=offset, limit=limit)
+    # Fetch tweets and retweets from the users the current user is following
+    tweets = get_feed_tweets(CURSOR, offset=offset, limit=limit)
+    clear_screen()
+    print_location(1, 0, "*** YOUR FEED ***\n")
+    if tweets:
+        print(f"{'User':<20}{'Tweet':<50}{'Date'}")
+        print("-" * 80)
 
-        if tweets:
-            print("\n*** YOUR FEED ***\n")
-            print(f"{'User':<20}{'Tweet':<50}{'Date'}")
-            print("-" * 80)
-
-            for writer_id, name, text, tdate in tweets:
-                print(f"{name:<20}{text[:45]:<50}{tdate}")
+        for writer_id, name, text, tdate in tweets:
+            print(f"{name:<20}{text[:45]:<50}{tdate}")
+    else:
+        if offset == 0:
+            print("Your feed is empty. Start following users to see their tweets!")
         else:
-            if offset == 0:
-                print("Your feed is empty. Start following users to see their tweets!")
-            else:
-                print("No more tweets to display.")
+            print("No more tweets to display.")
+
+    while True:
 
         # User prompt for further actions
-        user_input = input("\nEnter 'n' for next 5 tweets,'q' to exit, or 's' for Main Menu: ").strip().lower()
+        move_cursor(12, 0)
+        print(ANSI["CLEARLINE"], end="\r")
+
+        print_location(12, 0, "Enter 'n' for next 5 tweets,'q' to exit, or 's' for Main Menu: " )
+        move_cursor(12, 65)
+        user_input = input("").strip().lower()
         if user_input == 'n':
             offset += limit  # Increment offset to fetch the next set of tweets
         elif user_input == 'q':
-            break
+            clear_screen()
+            exit()
         elif user_input == 's':
             from main import system_functions
+            clear_screen()
             system_functions(CURSOR, CURRENT_USER_ID)
         else:
-            print("Invalid input. Please try again.")
+            print_location(11, 0, "Invalid input. Please try again.")
 
 def get_feed_tweets(cursor, offset=0, limit=5):
     """
