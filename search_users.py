@@ -127,6 +127,10 @@ def user_feed(cursor, current_user_id):
         tweets = get_feed_tweets(CURSOR, offset=offset, limit=limit)
 
         if tweets:
+            for row in range(5, 10):
+                move_cursor(row, 0)
+                print(ANSI["CLEARLINE"], end="\r")
+
             print_location(3, 0, f"{'User':<20}{'Tweet':<50}{'Date'}")
             print_location(4, 0, "-" * 80)
 
@@ -138,16 +142,22 @@ def user_feed(cursor, current_user_id):
             if offset == 0:
                 print_location(3, 0, "Your feed is empty. Start following users to see their tweets!")
             else:
-                print_location(8 + row, 0, "No more tweets to display.")
+                move_cursor(11, 0)
+                print(ANSI["CLEARLINE"], end="\r")
+                print_location(11, 0, "No more tweets to display.")
                 move_cursor(7 + row, 65)
                 print(ANSI["CLEARLINE"], end="\r")
                 
 
         # User prompt for further actions
-        print_location(7 + row, 0, "Enter 'n' for next 5 tweets, 'q' to exit, or 's' for Main Menu: ")
-        move_cursor(7 + row, 65)
+        print_location(12, 0, "Enter 'n' for next 5 tweets, 'q' to exit, or 's' for Main Menu: ")
+        move_cursor(12, 65)
         user_input = input("").strip().lower()
         if user_input == 'n':
+            move_cursor(11, 0)
+            print(ANSI["CLEARLINE"], end="\r")
+            move_cursor(12,65)
+            print(ANSI["CLEARLINE"], end="\r")
             offset+=5
         elif user_input == 'q':
             exit()
@@ -155,8 +165,10 @@ def user_feed(cursor, current_user_id):
             from main import system_functions
             system_functions(CURSOR, CURRENT_USER_ID)
         else:
-            print_location(8 + row, 0, "Invalid input. Please try again.")
-            move_cursor(8 + row, 91)
+            move_cursor(11, 0)
+            print(ANSI["CLEARLINE"], end="\r")
+            print_location(11, 0, "Invalid input. Please try again.")
+            move_cursor(12, 65)
             print(ANSI["CLEARLINE"], end="\r")
 
 def get_feed_tweets(cursor, offset=0, limit=5):
