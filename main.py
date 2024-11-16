@@ -78,6 +78,7 @@ def registered_user():
             move_cursor(6,0)
             print(ANSI["CLEARLINE"], end="\r") # Clear anything written previulsy in that line
             print_location(6, 0, "Login successful!")
+            input("Press Enter to continue......")
             
             CURRENT_USER_ID = user[0]  # After a successful login, assign the user ID to CURRENT_USER_ID
             move_cursor(8,0)
