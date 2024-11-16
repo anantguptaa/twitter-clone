@@ -68,20 +68,65 @@ def reply_to_tweet(cursor, user_id, tweet_id):
     :param user_id: The ID of the user currently logged in.
     :param tweet_id: The ID of the tweet to reply to.
     """
-    reply_text = input("\nEnter your reply: ").strip()
-    if reply_text:
-        timestamp = datetime.now()
+
+    reply = True
+    while reply:
+        reply_text = input("\nEnter your reply: ").strip()
+        if reply_text:
+            input_terms = reply_text.split(" ")
+            hashtag = []
+            valid = True  # Track if the input is valid
+            
+            for term in input_terms:
+                if term[0] == "#" and len(term) > 1:
+                    if term.lower() not in hashtag:
+                        hashtag.append(term.lower())
+                    else:
+                        print("\nPlease try again: Duplicate hashtags are not allowed!\n")
+                        valid = False  # Mark the input as invalid
+                        break  # Exit the loop as input is already invalid
+            
+            if valid:  # If no duplicates, exit the loop
+                reply = False
+
+        else:
+            print( "\nPlease try again: Reply cannot be empty!\n")
+            reply = True
+
+    cursor.execute(
+       """
+        SELECT MAX(tid) FROM tweets
+       """
+    )
+    max_tid = cursor.fetchone()[0]
+    if max_tid is None:
+        new_tid = 1 
+    else:
+        new_tid = max_tid + 1  
+
+
+    timestamp = datetime.now()
+    cursor.execute(
+        """
+        INSERT INTO tweets (tid, writer_id, text, tdate, ttime, replyto_tid)
+        VALUES (?, ?, ?, ?, ?, ?)
+        """, 
+        (new_tid, user_id, reply_text, timestamp.strftime('%Y-%m-%d'), timestamp.strftime('%H:%M:%S'), tweet_id)
+    )
+    for tag in hashtag:
         cursor.execute(
             """
-            INSERT INTO tweets (writer_id, text, tdate, ttime, replyto_tid)
-            VALUES (?, ?, ?, ?, ?)
-            """, 
-            (user_id, reply_text, timestamp.strftime('%Y-%m-%d'), timestamp.strftime('%H:%M:%S'), tweet_id)
+            INSERT INTO hashtag_mentions (tid, term)
+            VALUES (?, ?)
+            """,
+            (new_tid, tag)
+
         )
-        cursor.connection.commit()
-        print("Reply posted successfully!")
-    else:
-        print("Reply cannot be empty.")
+
+
+    cursor.connection.commit()
+    print("Reply posted successfully!")
+
 
 def retweet_tweet(cursor, user_id, tweet_id):
     """
