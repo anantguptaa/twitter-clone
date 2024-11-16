@@ -189,18 +189,17 @@ def compose_tweet(cursor):
 
         # making list of input words
         input_terms = tweet_text.split(" ")
-        valid = 0
         hashtag = []
         for term in input_terms:
             if term[0] == "#" and len(term) > 1:
                 if term.lower() not in hashtag:
                     hashtag.append(term.lower())
-                    inp = False
                 else:
                     move_cursor(4, 0)
                     print(ANSI["CLEARLINE"], end="\r")
                     print_location(4, 0, "Please try again: Duplicate hashtags are not allowed!")
                     inp = True
+        inp = False
 
 
     CURSOR.execute(
@@ -246,11 +245,11 @@ def compose_tweet(cursor):
 
     i = True
     while i:
-        print_location(9, 0, "Enter 'h' to go back to Home Page, 'm' to go back to Main Menu or 'q' to quit:  ")
+        print_location(9, 0, "Enter 'f' to view user feed, 'm' to go back to Main Menu or 'q' to quit:  ")
         move_cursor(9, 90)
         user_input = input("")
-        if user_input == 'h':
-            follower_utils.showFollowers(CURRENT_USER_ID, CURSOR)
+        if user_input == 'f':
+            user_feed()
             i = False
         elif user_input == 'q':
             exit()
