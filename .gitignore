@@ -3,6 +3,8 @@ __pycache__/
 *.py[cod]
 *$py.class
 
+prj-sample.db
+
 # C extensions
 *.so
 
