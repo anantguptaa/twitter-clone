@@ -112,7 +112,7 @@ def user_feed(cursor, current_user_id):
     Uses the existing `viewTweets` function for pagination.
     """
     global CURRENT_USER_ID, CURSOR
-    
+
     CURSOR = cursor
     CURRENT_USER_ID = current_user_id
 
@@ -122,7 +122,6 @@ def user_feed(cursor, current_user_id):
     # Clear the previous screen output
     clear_screen()
     print_location(1, 0, "*** YOUR FEED ***\n")
-
     while True:
         # Fetch tweets and retweets from the users the current user is following
         tweets = get_feed_tweets(CURSOR, offset=offset, limit=limit)
@@ -144,26 +143,21 @@ def user_feed(cursor, current_user_id):
                 print(ANSI["CLEARLINE"], end="\r")
                 
 
-    while True:
-
         # User prompt for further actions
         print_location(7 + row, 0, "Enter 'n' for next 5 tweets, 'q' to exit, or 's' for Main Menu: ")
         move_cursor(7 + row, 65)
         user_input = input("").strip().lower()
-
         if user_input == 'n':
             offset+=5
         elif user_input == 'q':
             exit()
         elif user_input == 's':
             from main import system_functions
-            clear_screen()
             system_functions(CURSOR, CURRENT_USER_ID)
         else:
             print_location(8 + row, 0, "Invalid input. Please try again.")
             move_cursor(8 + row, 91)
             print(ANSI["CLEARLINE"], end="\r")
-
 
 def get_feed_tweets(cursor, offset=0, limit=5):
     """
