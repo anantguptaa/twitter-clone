@@ -142,21 +142,22 @@ def user_feed(cursor, current_user_id):
             if offset == 0:
                 print_location(3, 0, "Your feed is empty. Start following users to see their tweets!")
             else:
-                move_cursor(11, 0)
+                move_cursor(12, 0)
                 print(ANSI["CLEARLINE"], end="\r")
-                print_location(11, 0, "No more tweets to display.")
+                print_location(12, 0, "No more tweets to display.")
                 move_cursor(7 + row, 65)
                 print(ANSI["CLEARLINE"], end="\r")
                 
 
         # User prompt for further actions
-        print_location(12, 0, "Enter 'n' for next 5 tweets, 'q' to exit, or 's' for Main Menu: ")
-        move_cursor(12, 65)
+        print_location(10, 0, "-" * 80)
+        print_location(13, 0, "Enter 'n' for next 5 tweets, 'q' to exit, or 's' for Main Menu: ")
+        move_cursor(13, 65)
         user_input = input("").strip().lower()
         if user_input == 'n':
             move_cursor(11, 0)
             print(ANSI["CLEARLINE"], end="\r")
-            move_cursor(12,65)
+            move_cursor(13,65)
             print(ANSI["CLEARLINE"], end="\r")
             offset+=5
         elif user_input == 'q':
@@ -168,7 +169,7 @@ def user_feed(cursor, current_user_id):
             move_cursor(11, 0)
             print(ANSI["CLEARLINE"], end="\r")
             print_location(11, 0, "Invalid input. Please try again.")
-            move_cursor(12, 65)
+            move_cursor(13, 65)
             print(ANSI["CLEARLINE"], end="\r")
 
 def get_feed_tweets(cursor, offset=0, limit=5):
