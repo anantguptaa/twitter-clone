@@ -19,8 +19,9 @@ def showFollowers(user_id, cursor):
  
     offset = 0 # The starting point for fetching followers.
     follower_ids = []  # To keep track of all follower IDs
+    clear_screen()
     while True:
-        print("\n\n*** YOUR FOLLOWER LIST ***\n")
+        print("\n*** YOUR FOLLOWER LIST ***\n")
         # Get the list of followers with pagination
         followers = getFollowerList(offset=offset, limit=5)
 
@@ -99,7 +100,7 @@ def showFollowerDetails(follower_id, cursor):
           follower_id (int): The ID of the follower whose details are to be shown.
 
       """
-
+    clear_screen()
     print("\n\n*** FOLLOWER DETAIL ***\n")
     
     global CURSOR
