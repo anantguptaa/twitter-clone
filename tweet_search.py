@@ -1,9 +1,11 @@
 from datetime import datetime
 from common_utils import *
+from search_users import user_feed
 
 def search_tweets(cursor, user_id):
     """
     Search for tweets based on keywords and display options to reply, retweet, or view replies.
+    Displays results 5 at a time.
     :param cursor: SQLite database cursor for executing queries.
     :param user_id: The ID of the user currently logged in.
     """
@@ -11,10 +13,26 @@ def search_tweets(cursor, user_id):
     USER_ID = user_id
 
     clear_screen()
-    print("*** TWEET SEARCH ***")
+    print_location(1, 0, "*** TWEET SEARCH ***")
+
     
     # Prompt for search keywords
-    keywords = input("Enter keywords (separated by spaces, use # for hashtags): ").strip().lower().split()
+    inp = False
+    while not inp:
+        move_cursor(4, 0)
+        print(ANSI["CLEARLINE"], end="\r")
+        print_location(4, 0, "Enter keywords (separated by spaces, use # for hashtags): ")
+        move_cursor(4, 58)
+        keywords = input("").strip().lower().split()
+        if not keywords:
+            move_cursor(3, 65)
+            print(ANSI["CLEARLINE"], end="\r")  
+            print_location(3, 0, "Invalid Input: Keyword cannot be empty")
+        else:
+            move_cursor(3, 65)
+            print(ANSI["CLEARLINE"], end="\r")  
+            inp = True
+
     
     # Build the query to search tweets
     search_query = '''
@@ -31,61 +49,90 @@ def search_tweets(cursor, user_id):
     cursor.execute(search_query, params)
     results = cursor.fetchall()
     
-    # Display search results
+    # Display search results 5 at a time
     if results:
         print("\nSearch Results:")
-        for i, (tid, text, tdate, ttime) in enumerate(results, start=1):
-            print(f"{i}. {tdate} {ttime} - {text}")
-        
-        # Prompt user to select a tweet to interact with
-        choice = input("\nSelect a tweet number to interact with it, or press Enter to return: ").strip()
-        if choice.isdigit():
-            selected_index = int(choice) - 1
-            if 0 <= selected_index < len(results):
-                tweet_id, tweet_text, tweet_date, tweet_time = results[selected_index]
-                
-                # Fetch tweet statistics
-                cursor.execute("SELECT COUNT(*) FROM retweets WHERE tid = ?", (tweet_id,))
-                retweet_count = cursor.fetchone()[0]
-                
-                cursor.execute("SELECT COUNT(*) FROM tweets WHERE replyto_tid = ?", (tweet_id,))
-                reply_count = cursor.fetchone()[0]
-                
-                print(f"\nSelected Tweet: {tweet_text}")
-                print(f"Date: {tweet_date} Time: {tweet_time}")
-                print(f"Retweets: {retweet_count}, Replies: {reply_count}")
-                
-                # Interaction options
-                print("\nOptions: ")
-                print("1. Reply to this tweet")
-                print("2. Retweet this tweet")
-                print("3. View replies")
-                print("4. Cancel")
-                
-                not_selected = True
-                while not_selected:
-                    action = input("Choose an action: ").strip()
-                    if action == '1':
-                        reply_to_tweet(cursor, user_id, tweet_id)
-                        not_selected = False
-                    elif action == '2':
-                        retweet_tweet(cursor, user_id, tweet_id)
-                        not_selected = False
-                    elif action == '3':
-                        view_replies(cursor, tweet_id)
-                        not_selected = False
-                    elif action == '4':
-                        print("Cancelled.")
-                        not_selected = False
-                    else:
-                        print("Invalid choice. Please Try Again")
+        page_size = 5
+        total_results = len(results)
+        current_index = 0
+
+        clear_screen()
+        print("*** SEARCH RESULTS ***")
+        while current_index < total_results:
+
+            for row in range(5, 12):
+                move_cursor(row, 0)
+                print(ANSI["CLEARLINE"], end="\r")
+
+            move_cursor(3, 0)
+            for i in range(current_index, min(current_index + page_size, total_results)):
+                tid, text, tdate, ttime = results[i]
+                print(f"{i + 1}. {tdate} {ttime} - {text}")
+            
+            # Check if more tweets are available
+            if current_index + page_size < total_results:
+                print("\nPress 'n' for the next 5 tweets, press 'u' to return to user feed or choose a tweet number to interact.")
             else:
-                print("Invalid selection.")
+                print("\nNo more tweets. Choose a tweet number to interact, press 'u' to return to user feed or press Enter to return.")
+            
+            choice = input("Your choice: ").strip()
+            move_cursor(12, 0)
+            print(ANSI["CLEARLINE"], end="\r")
+            if choice.lower() == 'u':
+                user_feed(cursor, user_id)
+            elif choice.isdigit():
+                selected_index = int(choice) - 1
+                if 0 <= selected_index < total_results:
+                    tweet_id, tweet_text, tweet_date, tweet_time = results[selected_index]
+                    
+                    # Fetch tweet statistics
+                    cursor.execute("SELECT COUNT(*) FROM retweets WHERE tid = ?", (tweet_id,))
+                    retweet_count = cursor.fetchone()[0]
+                    
+                    cursor.execute("SELECT COUNT(*) FROM tweets WHERE replyto_tid = ?", (tweet_id,))
+                    reply_count = cursor.fetchone()[0]
+                    
+                    print(f"\nSelected Tweet: {tweet_text}")
+                    print(f"Date: {tweet_date} Time: {tweet_time}")
+                    print(f"Retweets: {retweet_count}, Replies: {reply_count}")
+                    
+                    # Interaction options
+                    print("\nOptions: ")
+                    print("1. Reply to this tweet")
+                    print("2. Retweet this tweet")
+                    print("3. View replies")
+                    print("4. Cancel")
+                    
+                    not_selected = True
+                    while not_selected:
+                        action = input("Choose an action: ").strip()
+                        if action == '1':
+                            reply_to_tweet(cursor, user_id, tweet_id)
+                            not_selected = False
+                        elif action == '2':
+                            retweet_tweet(cursor, user_id, tweet_id)
+                            not_selected = False
+                        elif action == '3':
+                            view_replies(cursor, tweet_id)
+                            not_selected = False
+                        elif action == '4':
+                            print("Cancelled.")
+                            not_selected = False
+                        else:
+                            print("Invalid choice. Please try again.")
+                else:
+                    print("Invalid selection.")
+            elif choice.lower() == 'n' and current_index + page_size < total_results:
+                current_index += page_size
+            elif choice == '':
+                break
+            else:
+                print("Invalid choice. Please try again.")
     else:
-        print("No tweets found with the given keywords.")
+        print_location(6, 0, "No tweets found with the given keywords.")
     
     input("\nPress Enter to return to the main menu...")
-    clear_screen(    )
+    clear_screen()
     from main import system_functions
     system_functions(cursor, user_id)
 
@@ -217,5 +264,3 @@ def view_replies(cursor, tweet_id):
     clear_screen(    )
     from main import system_functions
     system_functions(cursor, USER_ID)
-
-

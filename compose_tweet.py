@@ -35,6 +35,8 @@ def compose_tweet(cursor, CURRENT_USER_ID):
             if valid:
                 inp = False
         else:
+            move_cursor(4, 0)
+            print(ANSI["CLEARLINE"], end="\r")
             print_location(4, 0, "Please try again: Empty tweets are not allowed")
 
 
@@ -83,10 +85,10 @@ def compose_tweet(cursor, CURRENT_USER_ID):
     while i:
         move_cursor(9, 0)
         print(ANSI["CLEARLINE"], end="\r")
-        print_location(9, 0, "Enter 'f' to view user feed, 's' to go back to Main Menu or 'q' to quit:  ")
+        print_location(9, 0, "Enter 'u' to view user feed, 's' to go back to Main Menu or 'q' to quit:  ")
         move_cursor(9, 75)
         user_input = input("")
-        if user_input.lower() == 'f':
+        if user_input.lower() == 'u':
             user_feed(CURSOR, CURRENT_USER_ID)
             i = False
         elif user_input.lower() == 'q':
@@ -98,4 +100,4 @@ def compose_tweet(cursor, CURRENT_USER_ID):
             i = False
         else:
             print_location(8 , 0, "Invalid Input: Please Try Again")
-            i = True       
+            i = True

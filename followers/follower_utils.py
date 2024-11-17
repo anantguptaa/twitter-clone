@@ -1,5 +1,6 @@
 import sqlite3
 from common_utils import *
+from search_users import user_feed
 from main import system_functions
 
 CURRENT_USER_ID = None
@@ -19,46 +20,64 @@ def showFollowers(user_id, cursor):
  
     offset = 0 # The starting point for fetching followers.
     follower_ids = []  # To keep track of all follower IDs
+    clear_screen()
+    print_location(1,0, "*** YOUR FOLLOWER LIST ***")
+    
     while True:
-        print("\n\n*** YOUR FOLLOWER LIST ***\n")
         # Get the list of followers with pagination
         followers = getFollowerList(offset=offset, limit=5)
 
         if followers:
-            print(f"{'User ID':<10}{'Name':<15}{'Status'}") 
-            print("-" * 40)
+            print_location(3, 0, f"{'User ID':<10}{'Name':<15}{'Status'}")
+            print_location(4, 0, "-" * 35)
 
-            for fid, name in followers:
+            for idx, (fid, name) in enumerate(followers):
                 follower_ids.append(fid)
                 status = 'Following' if isFollowing(fid) else 'Unfollowed'
-                print(f"{fid:<10}{name:<15}{status}")
-
+                print_location(5 + idx, 0, f"{fid:<10}{name:<15}{status}")
         else:
-            print("No more followers")
+            print_location(3, 0, "No followers")
 
-        user_input = input("\nEnter 'User ID' to check user detail, 'n' to see more followers, 'q' to quit, or 's' for Main Menu: ").strip().lower()
+        # User interaction prompt
+        print_location(10, 0, "-" * 35)
+        print_location(12, 0, "Enter 'User ID' to check user detail, 'n' to see more followers, 'q' to quit, 'u' for user feed, or 's' for Main Menu: ")
+        move_cursor(12, 120)
+        print(ANSI["CLEARLINE"], end="\r")
+        move_cursor(12, 120)
+        user_input = input("").strip().lower()
+
         if user_input == 'n':
             next_followers = getFollowerList(offset=offset + 5, limit=5)
             if next_followers:  # Only load more if there are more followers
-               offset += 5  # Move to the next page
+                offset += 5  # Move to the next page
             else:
-              print("No more follower to display")
-
+                move_cursor(13,0)
+                print(ANSI["CLEARLINE"], end="\r")
+                print_location(13, 0, "No more followers to display")
         elif user_input == 'q':
-            exit()  # exit the loop, go back to Main Menu
+            exit()
+        elif user_input == 'u':
+            user_feed(CURSOR, CURRENT_USER_ID)
+            return
         elif user_input == 's':
             system_functions(cursor, user_id)
-            # break
+            return  # Return to the main menu
         else:
-            follower_id = int(user_input)
-            if follower_id in follower_ids:
-                # Show detailed information of the follower
-                showFollowerDetails(follower_id, cursor)
-                # After viewing the details, return to the main list
-                continue  # Continue the loop to display followers
-            else:
-                print("Invalid input. Please try again.")
-
+            try:
+                follower_id = int(user_input)
+                if follower_id in follower_ids:
+                    # Show detailed information of the follower
+                    showFollowerDetails(follower_id, cursor)
+                    # After viewing the details, return to the main list
+                    continue
+                else:
+                    move_cursor(13,0)
+                    print(ANSI["CLEARLINE"], end="\r")
+                    print_location(13, 0, "Invalid User ID. Please try again.")
+            except ValueError:
+                move_cursor(13,0)
+                print(ANSI["CLEARLINE"], end="\r")
+                print_location(13, 0, "Invalid input. Please try again.")
 
 def getFollowerList(offset=0, limit=5):
     """
@@ -92,15 +111,15 @@ def getFollowerList(offset=0, limit=5):
 
 def showFollowerDetails(follower_id, cursor):
     """
-      Displays detailed information about a specific follower, including contact info,tweet counts, and latest tweets.
-      Offers options to follow this follower, see more tweets, or go back.
+    Displays detailed information about a specific follower, including contact info, tweet counts, and latest tweets.
+    Offers options to follow this follower, see more tweets, or go back.
 
-      Parameters:
-          follower_id (int): The ID of the follower whose details are to be shown.
+    Parameters:
+        follower_id (int): The ID of the follower whose details are to be shown.
+    """
 
-      """
-
-    print("\n\n*** FOLLOWER DETAIL ***\n")
+    clear_screen()
+    print_location(1, 0, "*** FOLLOWER DETAIL ***")
     
     global CURSOR
     CURSOR = cursor
@@ -116,47 +135,69 @@ def showFollowerDetails(follower_id, cursor):
 
         cursor.execute("SELECT COUNT(*) FROM follows WHERE flwer = ?", (follower_id,))
         following_count = cursor.fetchone()[0]
-
+        
         cursor.execute("SELECT COUNT(*) FROM follows WHERE flwee = ?", (follower_id,))
         follower_count = cursor.fetchone()[0]
 
         # Print header
-        print(f"{'User ID':<15}{'Name':<15}{'Email':<25}{'Phone':<15}{'#Tweets':<15}{'#Following':<15}{'#Followers'}")
-        print("-" * 110)
+        print_location(3, 0, f"{'User ID':<15}{'Name':<15}{'Email':<25}{'Phone':<15}{'#Tweets':<15}{'#Following':<15}{'#Followers'}")
+        print_location(4, 0, "-" * 110)
 
         # Print follower details
-        print(f"{follower_id:<15}{name:<15}{email:<25}{phone:<15}{tweet_count:<15}{following_count:<15}{follower_count}")
+        print_location(5, 0, f"{follower_id:<15}{name:<15}{email:<25}{phone:<15}{tweet_count:<15}{following_count:<15}{follower_count}")
 
         # Show the first set of 3 tweets
-        print(f"\nLast 3 tweets from {name}:")
-        viewTweets(follower_id, offset=0, limit=3)
+        print_location(7, 0, f"Last 3 tweets from {name}:")
+        if not viewTweets(follower_id, offset=0, limit=3):
+            print_location(8,4,"No tweets by this user.")
         offset = 3  # For the next set of tweets
 
         while True:
             # Option to follow, see more tweets, or go back
-            user_input = input("\nEnter 'f' to follow this user, 't' to see more tweets, or 'q' to go back: ").strip().lower()
+            print_location(12, 0, "Enter 'f' to follow this user, 't' to see more tweets, 'q' to quit, 'u' for user feed, or 's' for Main Menu: ")
+            move_cursor(12, 110)
+            print(ANSI["CLEARLINE"], end="\r")
+            move_cursor(12, 110)     # Move cursor for user input
+            user_input = input("").strip().lower()  
+            
 
             if user_input == 'f':
-                if(isFollowing(follower_id)):
-                    print("You have followed her/him")
+                if isFollowing(follower_id):
+                    move_cursor(14,0)
+                    print(ANSI["CLEARLINE"], end="\r")
+                    print_location(14, 0, "You are already following this user.")
                 else:
-                    followUser(follower_id) #if not followed, call the function to follow
+                    followUser(follower_id)  # Call the function to follow
+                    move_cursor(14,0)
+                    print(ANSI["CLEARLINE"], end="\r")
+                    print_location(14, 0, "You are now following this user.")
 
             elif user_input == 't':
-                # # View more tweets (next 3 tweets)
-                print(f"\nNext 3 tweets from {name}:")               
+                # View more tweets (next 3 tweets)
+                print_location(7, 0, f"Next 3 tweets from {name}:")
                 new_tweets = viewTweets(follower_id, offset=offset, limit=3)
-                if new_tweets:  
-                    offset += 3  # Increment the offset for the next page of tweets only there is tweets in the next page
-              
-                  
+                if new_tweets:
+                    offset += 3  # Increment the offset for the next page of tweets
+                else:
+                    move_cursor(14,0)
+                    print(ANSI["CLEARLINE"], end="\r")
+                    print_location(14, 0, "No more tweets to display.")
             elif user_input == 'q':
-                break  # Go back to the previous screen
+                exit()      
+            elif user_input == 's':
+                system_functions(CURSOR, CURRENT_USER_ID)
+                return
+            elif user_input == 'u':
+                user_feed(CURSOR, CURRENT_USER_ID)
+                return
             else:
-                print("Invalid option. Please try again.")
+                move_cursor(14,0)
+                print(ANSI["CLEARLINE"], end="\r")
+                print_location(14, 0, "Invalid option. Please try again.")
 
     else:
-        print("Follower not found.")
+        print_location(3, 0, "Follower not found.")
+
 
 def followUser(follower_id):
     """
@@ -172,7 +213,7 @@ def followUser(follower_id):
 
     # Check if the follow relationship already exists
     if isFollowing(follower_id):
-        print(f"Error: You are already following user {follower_id}.")
+        # print(f"Error: You are already following user {follower_id}.")
         return
 
     else:
@@ -229,7 +270,7 @@ def viewTweets(follower_id, offset=0, limit=3):
         for tweet in tweets:
             print(f"{tweet[1]} - {tweet[0]}")
     else:
-        print("No more tweets available.")
+        return False
     
     return tweets
 

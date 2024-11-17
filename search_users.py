@@ -5,6 +5,14 @@ CURRENT_USER_ID = None
 CURSOR = None
 
 def search_users(cursor, current_user_id):
+    '''
+    ## this fucntion is used to search users, and it calls showFollowerDetails
+    when asked to view the follower details
+
+    ### Args:
+        - `cursor (_type_)`: sql cursor for database
+        - `current_user_id (_type_)`: current user id in the database
+    '''
     global CURSOR, CURRENT_USER_ID
     CURSOR = cursor
     CURRENT_USER_ID = current_user_id
@@ -15,14 +23,26 @@ def search_users(cursor, current_user_id):
     limit = 5
     
     while True:
-        print_location(3, 0, "Enter Keyword: ")
-        move_cursor(3, 16)
-        keyword = input("").strip()
+        while True:
+            move_cursor(3, 16)
+            print(ANSI["CLEARLINE"], end="\r")
+            print_location(3, 0, "Enter Keyword: ")
+            move_cursor(3, 16)
+            keyword = input("").strip()
+            move_cursor(5,0)
+            print(ANSI["CLEARLINE"], end="\r")
+            if not keyword:
+                print_location(5,0,"Invalid Input. Keyowrd cannot be empty.")
+            else:
+                break
+                
         
         # Fetch users based on the keyword, offset, and limit
         users = get_users_list(keyword, offset, limit)
     
         if not users:
+            move_cursor(5,0)
+            print(ANSI["CLEARLINE"], end="\r")
             print_location(5, 0, "No users found.")
             move_cursor(3, 16)  # Move cursor back to the keyword input position
             print(ANSI["CLEARLINE"], end="\r")
@@ -31,19 +51,18 @@ def search_users(cursor, current_user_id):
         move_cursor(5, 0)
         print(ANSI["CLEARLINE"], end="\r")
         print_location(5, 0, "Users found: ")
-        
+
         for index, (usr, name) in enumerate(users, start=1):
             print_location(5 + index, 4, f"{index}. {name} (User ID: {usr})")
         
-        move_cursor(5 + index, 0)
         break  # Exit the loop once users are displayed
     
     # Extract the user IDs from the result for validation
     valid_user_ids = [user[0] for user in users]
     
-    print_location(7 + index,0,"Enter 'n' to see more, 'User ID' to view user details, 'q' to quit, or 's' for Main Menu: ")
+    print_location(12,0,"Enter 'n' to see more, 'User ID' to view user details, 'q' to quit, 'u' for user feed, or 's' for Main Menu: ")
     while True:
-        move_cursor(7 + index, 91)
+        move_cursor(12, 110)
         user_input = input("").strip().lower()
 
         if user_input == 'n':
@@ -52,17 +71,30 @@ def search_users(cursor, current_user_id):
             next_users = get_users_list(keyword, offset=offset, limit=limit)
             
             if next_users:  # Only display more users if there are more
-                print_location(5 + len(users), 0, "Users found: ")
+                print_location(5, 0, "Users found: ")
+                
+                for row in range(6, 11):
+                    move_cursor(row, 0)
+                    print(ANSI["CLEARLINE"], end="\r")
+                
                 for index, (usr, name) in enumerate(next_users, start=1):
-                    print_location(5 + len(users) + index, 4, f"{index}. {name} (User ID: {usr})")
+                    print_location(5 + index, 4, f"{index}. {name} (User ID: {usr})")
+                    
                 users.extend(next_users)  # Add the new users to the list
-            else:
-                move_cursor(8 + len(users),0)
-                print(ANSI["CLEARLINE"], end="\r")
-                print_location(8 + len(users), 0, "No more users to display.")
-                move_cursor(7+index, 91)
+                valid_user_ids = [user[0] for user in users]
+                move_cursor(12, 110)
                 print(ANSI["CLEARLINE"], end="\r")
                 
+            else:
+                move_cursor(13,0)
+                print(ANSI["CLEARLINE"], end="\r")
+                print_location(13, 0, "No more users to display.")
+                move_cursor(12, 110)
+                print(ANSI["CLEARLINE"], end="\r")
+                
+        elif user_input == 'u':
+            user_feed(CURSOR, CURRENT_USER_ID)
+            return
         
         elif user_input == 'q':
             exit()  # Exit the program
@@ -83,11 +115,11 @@ def search_users(cursor, current_user_id):
                     follower_utils.showFollowerDetails(user_id, CURSOR)
                 else:
                     print("Invalid User ID. Please try again.")
-                    move_cursor(7+index, 91)
+                    move_cursor(7+index, 110)
                     print(ANSI["CLEARLINE"], end="\r")
             except ValueError:
                 print("Invalid input. Please enter a valid User ID.")
-                move_cursor(7+index, 91)
+                move_cursor(7+index, 110)
                 print(ANSI["CLEARLINE"], end="\r")
 
 def get_users_list(keyword, offset=0, limit=5):
@@ -139,7 +171,7 @@ def user_feed(cursor, current_user_id):
             # Display each tweet or retweet
             for index, (writer_id, name, text, tdate) in enumerate(tweets, start=1):
                 print_location(4 + index, 0, f"{name:<20}{text[:45]:<50}{tdate}")
-            row = len(tweets)
+
         else:
             if offset == 0:
                 print_location(3, 0, "Your feed is empty. Start following users to see their tweets!")
@@ -147,7 +179,7 @@ def user_feed(cursor, current_user_id):
                 move_cursor(12, 0)
                 print(ANSI["CLEARLINE"], end="\r")
                 print_location(12, 0, "No more tweets to display.")
-                move_cursor(7 + row, 65)
+                move_cursor(13, 65)
                 print(ANSI["CLEARLINE"], end="\r")
                 
 

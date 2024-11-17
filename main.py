@@ -64,21 +64,21 @@ def registered_user():
 
     while True:  # Loop until valid credentials are provided
         
-        print_location(3, 0, "Enter Username: ")
+        print_location(3, 0, "Enter User ID: ")
         move_cursor(3, 17)
-        user_name = input("").strip()
+        user_id = input("").strip()
         
         move_cursor(4, 17)
         password = getpass("Enter Password: ").strip()
 
         # Query to check if the user exists and the password is correct
-        CURSOR.execute("SELECT * FROM users WHERE upper(name) = ? AND pwd = ?", (user_name.upper(), password))
+        CURSOR.execute("SELECT * FROM users WHERE usr = ? AND pwd = ?", (user_id, password))
         user = CURSOR.fetchone()
 
         if user:
             move_cursor(6,0)
             print(ANSI["CLEARLINE"], end="\r") # Clear anything written previulsy in that line
-            print_location(6, 0, "Login successful!")
+            print_location(6, 0, f"Login successful!\nWelcome {user[1]}!\n")
             input("Press Enter to continue......")
             
             CURRENT_USER_ID = user[0]  # After a successful login, assign the user ID to CURRENT_USER_ID
@@ -102,25 +102,68 @@ def unregistered_user():
         database.
     '''
     clear_screen()
-    print_location(1, 0, "*** UNREGISTERED USER ***")
-    
-    name = input("Enter name: ")
-    email = input("Enter email: ")
-    
-    while '@' not in email or '.' not in email:  # Simple check for '@' and '.'
-        print("Invalid email format. Please make sure the email contains '@' and a domain (e.g., 'example.com').")
-        email = input("Enter email: ").strip()
-    
-    # Get the user's phone number and ensure it's an integer
-    while True:
-        try:
-            phone = int(input("Enter phone number: ").strip())
-            break  # Exit the loop if the phone number is valid
-        except ValueError:
-            print("Invalid phone number. Please enter a valid integer.")
+    print_location(1, 0, "*** UNREGISTERED USER ***\n")
 
-    password = getpass("Enter password: ")
-    
+    # Display prompts once
+    print_location(3, 0, "Enter name: ")
+    print_location(4, 0, "Enter email: ")
+    print_location(5, 0, "Enter phone number: ")
+    print_location(6, 0, "Enter password: ")
+
+    # TAKING USERNAME INPUT
+    while True:
+        move_cursor(3, 13)  # Align cursor with the "Enter name: " prompt
+        print(ANSI["CLEARLINE"], end="\r")
+        move_cursor(3, 13)
+        name = input("").strip()
+        if name.isalnum():
+            break
+        move_cursor(8, 0)
+        print(ANSI["CLEARLINE"], end="\r")
+        print_location(8, 0, "Username should not contain spaces. Only alphanumeric usernames are allowed.")
+
+    # TAKING EMAIL INPUT
+    while True:
+        move_cursor(4, 14)  # Align cursor with the "Enter email: " prompt
+        print(ANSI["CLEARLINE"], end="\r")
+        move_cursor(4, 14)
+        email = input("").strip()
+        if '@' in email and '.' in email:  # Simple email validation
+            break
+        move_cursor(8, 0)
+        print(ANSI["CLEARLINE"], end="\r")
+        print_location(8, 0, "Invalid email format. Ensure it contains '@' and a domain (e.g., 'example.com').")
+
+    # TAKING PHONE NUMBER INPUT
+    while True:
+        move_cursor(5, 21)  # Align cursor with the "Enter phone number: " prompt
+        print(ANSI["CLEARLINE"], end="\r")
+        move_cursor(5, 21)
+        try:
+            phone = int(input("").strip())
+            if len(str(phone)) == 10:
+                break
+            move_cursor(8, 0)
+            print(ANSI["CLEARLINE"], end="\r")
+            print_location(8, 0, "The phone number must be exactly 10 digits.")
+        except ValueError:
+            move_cursor(8, 0)
+            print(ANSI["CLEARLINE"], end="\r")
+            print_location(8, 0, "Invalid phone number. Please enter a valid 10-digit number.")
+
+    # TAKING PASSWORD INPUT
+    while True:
+        move_cursor(6, 17)  # Align cursor with the "Enter password: " prompt
+        print(ANSI["CLEARLINE"], end="\r")
+        move_cursor(6, 17)
+        password = getpass("").strip()
+        if password:
+            break
+        move_cursor(8, 0)
+        print(ANSI["CLEARLINE"], end="\r")
+        print_location(8, 0, "Password cannot be empty.")
+
+
     # Generate a unique user ID (using max `usr` + 1 as a simple method)
     global CURSOR, CONN
     CURSOR.execute("SELECT MAX(usr) FROM users")
@@ -182,7 +225,8 @@ def system_functions(cursor, current_user_id):
     print_location(4, 0,'2. Search for users')
     print_location(5, 0,'3. Compose a tweet')
     print_location(6, 0,'4. List followers')
-    print_location(7, 0,'5. Logout')
+    print_location(7, 0,'5. User Feed')
+    print_location(8, 0,'6. Logout')
     
     while True:
         try:
@@ -195,8 +239,10 @@ def system_functions(cursor, current_user_id):
                 compose_tweet(CURSOR, CURRENT_USER_ID)
             elif user_input == 4:
                 follower_utils.showFollowers(CURRENT_USER_ID, CURSOR)
-            elif user_input == 5:
+            elif user_input == 6:
                 logout()
+            elif user_input == 5:
+                user_feed(CURSOR, CURRENT_USER_ID)
             else:
                 move_cursor(9,0)
                 print(ANSI["CLEARLINE"], end="\r")

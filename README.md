@@ -9,10 +9,10 @@ Group member names and ccids (3-4 members)
   gurbaaz, Gurbaaz Gill
 
 # Group work break-down strategy
-Luke Thomas - Part 1, database creation and readme file
-Yuheng Li - Part 4, pdf file and edits
-Anant Gupta - Login, Part 2, main.py creation, optimization of different parts and documentation/edits
-Gurbaaz Gill - Logout, Part 3, optimization of different parts and documentation/edits
+Luke Thomas - Part 1 (tweet_search.py), database creation and readme file
+Yuheng Li - Part 4 (follower_utils.py), common_utils.py, pdf file and edits
+Anant Gupta - Login, Part 2 (search_users.py), main.py creation, optimization of different parts and documentation/edits
+Gurbaaz Gill - Logout, Part 3 (compose_tweet.py), optimization of different parts and documentation/edits
 
 # Code execution guide
 Open the terminal and direct to the folder that contains the source code and database. 
