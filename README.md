@@ -25,10 +25,6 @@ A command-line Twitter clone built with Python and SQLite, simulating a social m
    ```bash
    pip install -r requirements.txt
    ```
-4. Initialize the SQLite database:
-   ```bash
-   python init_db.py
-   ```
 
 ## Usage
 Run the main script to start the CLI:
