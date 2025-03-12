@@ -1,44 +1,66 @@
-[![Review Assignment Due Date](https://classroom.github.com/assets/deadline-readme-button-22041afd0340ce965d47ae6ef1cefeee28c7c493a6346c4f15d667ab976d596c.svg)](https://classroom.github.com/a/ZQQhHp7h)
-# Assignment3
+# Twitter CLI Clone
 
-# CMPUT 291 Mini Project 1 -Fall 2024
-Group member names and ccids (3-4 members)  
-  luke5, Luke Thomas  
-  yuheng20, Yuheng Li  
-  anant5, Anant Gupta
-  gurbaaz, Gurbaaz Gill
+A command-line Twitter clone built with Python and SQLite, simulating a social media platform. Users can sign up, log in, and perform actions such as posting tweets, replying, retweeting, searching tweets by keywords/hashtags, and managing followers. The system supports paginated feeds, user search, and hashtag-based tweet retrieval.
 
-# Group work break-down strategy
-Luke Thomas - Part 1 (tweet_search.py), database creation and readme file
-Yuheng Li - Part 4 (follower_utils.py), common_utils.py, pdf file and edits
-Anant Gupta - Login, Part 2 (search_users.py), main.py creation, optimization of different parts and documentation/edits
-Gurbaaz Gill - Logout, Part 3 (compose_tweet.py), optimization of different parts and documentation/edits
+## Features
+- **User Authentication**: Sign up and log in securely.
+- **Tweet Management**: Post tweets, reply to tweets, and retweet.
+- **Search Functionality**: Find tweets by keywords or hashtags.
+- **Followers System**: Follow/unfollow users and view followers.
+- **Paginated Feed**: View tweets from followed users in batches of five.
+- **SQLite Database**: Persistent data storage with relational schema.
 
-# Code execution guide
-Open the terminal and direct to the folder that contains the source code and database. 
+## Installation
+1. Clone the repository:
+   ```bash
+   git clone https://github.com/your-username/twitter-cli.git
+   cd twitter-cli
+   ```
+2. Create a virtual environment (optional but recommended):
+   ```bash
+   python -m venv venv
+   source venv/bin/activate  # On Windows, use `venv\Scripts\activate`
+   ```
+3. Install dependencies:
+   ```bash
+   pip install -r requirements.txt
+   ```
+4. Initialize the SQLite database:
+   ```bash
+   python init_db.py
+   ```
 
-enter in the terminal python3 main.py database.db to start the program.
+## Usage
+Run the main script to start the CLI:
+```bash
+python main.py
+```
+Users can then follow on-screen prompts to log in, post tweets, follow users, search tweets, and more.
 
-Select one of the 3 options provided and follow the instructions on the screen:
-1. Login as an existing user using name as username, and the password that you created.
-3. Create an accout using your name, phone number, email and password. Creating an account will give you a unique ID number.
-4. Exit
+## Database Schema
+The SQLite database consists of the following tables:
+- **users**: Stores user information.
+- **tweets**: Stores tweet content.
+- **follows**: Manages follower relationships.
+- **retweets**: Tracks retweeted tweets.
+- **hashtag_mentions**: Maps hashtags to tweets.
+- **lists & include**: Allows users to categorize tweets.
 
-Once you are logged in, you can choose to go to your feed, or go to the main menu. 
+## File Structure
+```
+📂 twitter-cli
+ ├── main.py               # Entry point of the application
+ ├── model.db              # Sample Database
+ ├── follower_utils.py     # Manage followers
+ ├── compose_tweet.py      # Tweet creation and posting
+ ├── tweet_search.py       # Tweet searching functionality
+ ├── search_users.py       # User search functionality
+ ├── requirements.txt      # Dependencies
+ ├── README.md             # Project documentation
+```
 
-The feed will display 5 tweets at a time that are the most recent. You can scroll through them using the instructions on the screen.
-
-In the main menu, you can:
-1. Choose to search for tweets, where you can view, reply to, or retweet any tweet that you search for.
-2. Search for users, where you can follow if desired. You can also view said users activity (tweets, retweets, replies) (replies are considered tweets.)
-3. Write a tweet.
-4. View your followers list.
-5. Logout.
-
-Once you logout you can choose to exit the program or login/create a new account.
-
-# Names of anyone you have collaborated with (as much as it is allowed within the course policy) or a line saying that you did not collaborate with anyone else.  
-We did not collaborate with anyone.
-
-# More detail of any AI tool used.
-AI was used to search for bugs in our code. When execution errors occured we used AI (ChatGPT) to help streamline the process and aid in finding a more ideal solution.
+## Contributors
+- **Anant Gupta** - System functionalities, user search, login, and feed.
+- **Luke Thomas** - Tweet search and database setup.
+- **Yuheng Li** - Followers management.
+- **Gurbaaz Gill** - Tweet composition, login/logout optimization.
