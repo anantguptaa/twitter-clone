@@ -13,7 +13,7 @@ A command-line Twitter clone built with Python and SQLite, simulating a social m
 ## Installation
 1. Clone the repository:
    ```bash
-   git clone https://github.com/your-username/twitter-cli.git
+   git clone https://github.com/anantguptaa/twitter-clone.git
    cd twitter-cli
    ```
 2. Create a virtual environment (optional but recommended):
